@@ -4,11 +4,6 @@ import { OAuth2Client } from 'google-auth-library';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-/**
- * @desc    Google OAuth login/signup
- * @route   POST /api/auth/google
- * @access  Public
- */
 export const googleAuth = async (req, res) => {
   try {
     const { credential, role } = req.body;

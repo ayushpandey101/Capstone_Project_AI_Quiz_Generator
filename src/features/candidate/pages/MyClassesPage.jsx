@@ -11,10 +11,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Loader from '../../../components/Loader';
 
-/**
- * My Classes Page for Candidates
- * Shows all classes the candidate has joined
- */
 function MyClassesPage() {
   const navigate = useNavigate();
   const { user, token } = useAuth();

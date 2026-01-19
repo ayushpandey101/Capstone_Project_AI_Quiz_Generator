@@ -7,7 +7,6 @@ import Message from '../models/Message.js';
 import Class from '../models/Class.js';
 import User from '../models/User.js';
 
-// Helper function to parse mentions from message content
 const parseMentions = (content) => {
   const mentionRegex = /@(\w+)/g;
   const mentions = [];
@@ -20,10 +19,6 @@ const parseMentions = (content) => {
   return mentions;
 };
 
-/**
- * Get all messages for a class
- * GET /api/classes/:classId/messages
- */
 export const getClassMessages = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -90,10 +85,6 @@ export const getClassMessages = async (req, res) => {
   }
 };
 
-/**
- * Post a new message (announcement or question)
- * POST /api/classes/:classId/messages
- */
 export const postMessage = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -195,10 +186,6 @@ export const postMessage = async (req, res) => {
   }
 };
 
-/**
- * Delete a message
- * DELETE /api/classes/:classId/messages/:messageId
- */
 export const deleteMessage = async (req, res) => {
   try {
     const { classId, messageId } = req.params;
@@ -250,10 +237,6 @@ export const deleteMessage = async (req, res) => {
   }
 };
 
-/**
- * Mark all messages in a class as read for user
- * PUT /api/classes/:classId/messages/read-all
- */
 export const markAllClassMessagesAsRead = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -305,10 +288,6 @@ export const markAllClassMessagesAsRead = async (req, res) => {
   }
 };
 
-/**
- * Mark message as read
- * PUT /api/classes/:classId/messages/:messageId/read
- */
 export const markMessageAsRead = async (req, res) => {
   try {
     const { messageId } = req.params;
@@ -341,10 +320,6 @@ export const markMessageAsRead = async (req, res) => {
   }
 };
 
-/**
- * Get personal notifications for user (mentions and @everyone)
- * GET /api/messages/notifications
- */
 export const getPersonalNotifications = async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id;
@@ -423,10 +398,6 @@ export const getPersonalNotifications = async (req, res) => {
   }
 };
 
-/**
- * Get unread message count for user
- * GET /api/classes/:classId/messages/unread/count
- */
 export const getUnreadMessageCount = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -480,10 +451,6 @@ export const getUnreadMessageCount = async (req, res) => {
   }
 };
 
-/**
- * Get class members for mentions
- * GET /api/classes/:classId/members
- */
 export const getClassMembers = async (req, res) => {
   try {
     const { classId } = req.params;

@@ -3,10 +3,6 @@ import Class from '../models/Class.js';
 import Quiz from '../models/Quiz.js';
 import User from '../models/User.js';
 
-/**
- * Get comprehensive analytics for admin
- * GET /api/analytics/overview
- */
 export const getAnalyticsOverview = async (req, res) => {
   try {
     const adminId = req.user?.id || req.user?._id;
@@ -209,10 +205,6 @@ export const getAnalyticsOverview = async (req, res) => {
   }
 };
 
-/**
- * Get detailed question-level analytics
- * GET /api/analytics/questions
- */
 export const getQuestionAnalytics = async (req, res) => {
   try {
     const adminId = req.user?.id || req.user?._id;
@@ -297,10 +289,6 @@ export const getQuestionAnalytics = async (req, res) => {
   }
 };
 
-/**
- * Get class-specific analytics
- * GET /api/analytics/class/:classId
- */
 export const getClassAnalytics = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -403,10 +391,6 @@ export const getClassAnalytics = async (req, res) => {
   }
 };
 
-/**
- * Get detailed analytics for a specific student in a class
- * GET /api/analytics/student/:studentId/class/:classId
- */
 export const getStudentAnalytics = async (req, res) => {
   try {
     const { studentId, classId } = req.params;

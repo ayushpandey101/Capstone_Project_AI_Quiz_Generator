@@ -4,10 +4,6 @@
 const pendingRequests = new Map();
 const requestCache = new Map();
 
-/**
- * Deduplicates API requests - if the same request is already pending, 
- * returns the existing promise instead of making a new request
- */
 export const deduplicateRequest = (key, requestFn, cacheDuration = 0) => {
   // Check if there's a cached response
   if (cacheDuration > 0 && requestCache.has(key)) {
@@ -45,9 +41,6 @@ export const deduplicateRequest = (key, requestFn, cacheDuration = 0) => {
   return promise;
 };
 
-/**
- * Clear cached request data
- */
 export const clearCache = (key) => {
   if (key) {
     requestCache.delete(key);
@@ -56,9 +49,6 @@ export const clearCache = (key) => {
   }
 };
 
-/**
- * Debounce function to limit API call frequency
- */
 export const debounce = (func, wait) => {
   let timeout;
   return function executedFunction(...args) {

@@ -1,8 +1,5 @@
 import nodemailer from 'nodemailer';
 
-/**
- * Create email transporter
- */
 export const createEmailTransporter = () => {
   // Check if email credentials are configured
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -22,9 +19,6 @@ export const createEmailTransporter = () => {
   return transporter;
 };
 
-/**
- * Send password reset email
- */
 export const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
   try {
     const transporter = createEmailTransporter();

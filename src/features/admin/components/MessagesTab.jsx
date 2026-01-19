@@ -35,7 +35,6 @@ import { deduplicateRequest } from '../../../utils/requestCache';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useAuth } from '../../auth/contexts/AuthContext';
 
-// Helper function to render message content with highlighted mentions and clickable links
 const renderMessageContent = (content) => {
   const mentionRegex = /@(\w+)/g;
   const urlRegex = /(https?:\/\/[^\s]+)/g;

@@ -30,14 +30,6 @@ const createTransporter = () => {
   });
 };
 
-/**
- * Send class invitation email to a candidate
- * @param {string} recipientEmail - Email address of the candidate
- * @param {string} recipientName - Name of the candidate
- * @param {Object} classInfo - Class details
- * @param {string} inviteCode - Class invite code
- * @param {string} adminName - Name of the admin/instructor
- */
 export const sendClassInvitation = async (recipientEmail, recipientName, classInfo, inviteCode, adminName) => {
   try {
     const transporter = createTransporter();
@@ -161,9 +153,6 @@ The TheodoraQ Team
   }
 };
 
-/**
- * Send test email to verify configuration
- */
 export const sendTestEmail = async (recipientEmail) => {
   try {
     const transporter = createTransporter();

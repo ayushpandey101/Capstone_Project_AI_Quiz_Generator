@@ -2,8 +2,6 @@
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
-
-// This is a "sub-schema" for a single question
 const questionSchema = new Schema({
   text: {
     type: String,

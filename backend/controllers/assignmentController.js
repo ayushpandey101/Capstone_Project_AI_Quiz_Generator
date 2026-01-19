@@ -7,10 +7,6 @@ import Assignment from '../models/Assignment.js';
 import Quiz from '../models/Quiz.js';
 import Class from '../models/Class.js';
 
-/**
- * Create a new assignment (assign a quiz to a class)
- * POST /api/assignments
- */
 export const createAssignment = async (req, res) => {
   try {
   const { quizId, classId, dueDate, timeLimit, weightage, weightageType, subgroup, subclasses, proctoringEnabled } = req.body;
@@ -110,10 +106,6 @@ export const createAssignment = async (req, res) => {
   }
 };
 
-/**
- * Get all assignments created by the authenticated admin
- * GET /api/assignments
- */
 export const getAssignments = async (req, res) => {
   try {
     const adminId = req.user?.id || req.user?._id;
@@ -136,10 +128,6 @@ export const getAssignments = async (req, res) => {
   }
 };
 
-/**
- * Get a single assignment for a candidate to take
- * GET /api/candidate/assignment/:assignmentId
- */
 export const getSingleAssignment = async (req, res) => {
   try {
     const { assignmentId } = req.params;
@@ -319,10 +307,6 @@ export const getSingleAssignment = async (req, res) => {
   }
 };
 
-/**
- * Get assignments for a specific class
- * GET /api/assignments/class/:classId
- */
 export const getAssignmentsByClass = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -359,10 +343,6 @@ export const getAssignmentsByClass = async (req, res) => {
   }
 };
 
-/**
- * Update an assignment (edit due date and time limit)
- * PUT /api/assignments/:id
- */
 export const updateAssignment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -485,10 +465,6 @@ export const updateAssignment = async (req, res) => {
   }
 };
 
-/**
- * Delete an assignment
- * DELETE /api/assignments/:id
- */
 export const deleteAssignment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -530,10 +506,6 @@ export const deleteAssignment = async (req, res) => {
   }
 };
 
-/**
- * Get assignments for a specific class (for candidates)
- * GET /api/candidate/assignments/:classId
- */
 export const getCandidateAssignments = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -665,10 +637,6 @@ export const getCandidateAssignments = async (req, res) => {
   }
 };
 
-/**
- * Submit a quiz for grading
- * POST /api/candidate/submit-quiz/:assignmentId
- */
 export const submitQuiz = async (req, res) => {
   try {
     const { assignmentId } = req.params;
@@ -838,10 +806,6 @@ export const submitQuiz = async (req, res) => {
   }
 };
 
-/**
- * Get all submissions for a single assignment (for Admins)
- * GET /api/assignments/:assignmentId/submissions
- */
 export const getAssignmentSubmissions = async (req, res) => {
   try {
     const { assignmentId } = req.params;
@@ -912,10 +876,6 @@ export const getAssignmentSubmissions = async (req, res) => {
   }
 };
 
-/**
- * Get detailed submission with question-by-question breakdown
- * GET /api/assignments/:assignmentId/submissions/:submissionId
- */
 export const getSubmissionDetails = async (req, res) => {
   try {
     const { assignmentId, submissionId } = req.params;
@@ -1047,10 +1007,6 @@ export const getSubmissionDetails = async (req, res) => {
   }
 };
 
-/**
- * Get all results for a class (for Results tab)
- * GET /api/assignments/class/:classId/results
- */
 export const getClassResults = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -1176,11 +1132,6 @@ export const getClassResults = async (req, res) => {
   }
 };
 
-/**
- * Delete a specific submission
- * DELETE /api/assignments/:assignmentId/submissions/:submissionId
- * Allows admin to remove a candidate's submission so they can retake the exam
- */
 export const deleteSubmission = async (req, res) => {
   try {
     const { assignmentId, submissionId } = req.params;

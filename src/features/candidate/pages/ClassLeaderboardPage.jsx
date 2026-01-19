@@ -11,10 +11,6 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import Loader from '../../../components/Loader';
 
-/**
- * Class Leaderboard Page for Candidates
- * Shows ranking of all students based on their performance
- */
 function ClassLeaderboardPage() {
   const { classId } = useParams();
   const navigate = useNavigate();

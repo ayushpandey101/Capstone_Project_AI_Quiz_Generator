@@ -4,11 +4,6 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useGoogleAuth, renderGoogleButton } from '../hooks/useGoogleAuth';
 
-/**
- * A modern, two-panel signup component matching the login design.
- * Features a background image in the left panel and a clean form in the right.
- * Includes a toggle for "Candidate" and "Admin" account types.
- */
 function SignUp() {
   const navigate = useNavigate();
   const { signup, googleAuth } = useAuth();

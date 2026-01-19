@@ -1,8 +1,5 @@
 import { body, param, query, validationResult } from 'express-validator';
 
-/**
- * Handle validation errors
- */
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -15,9 +12,6 @@ export const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-/**
- * Validation for quiz generation
- */
 export const validateQuizGeneration = [
   body('prompt')
     .trim()
@@ -35,9 +29,6 @@ export const validateQuizGeneration = [
     .withMessage('Quiz types must be an array'),
 ];
 
-/**
- * Validation for assignment creation
- */
 export const validateAssignmentCreation = [
   body('quizId')
     .trim()
@@ -61,9 +52,6 @@ export const validateAssignmentCreation = [
     .withMessage('Time limit must be between 1 and 300 minutes'),
 ];
 
-/**
- * Validation for class creation
- */
 export const validateClassCreation = [
   body('title')
     .trim()
@@ -83,9 +71,6 @@ export const validateClassCreation = [
     .withMessage('Description must not exceed 500 characters'),
 ];
 
-/**
- * Validation for learning resource creation
- */
 export const validateResourceCreation = [
   body('title')
     .trim()
@@ -112,18 +97,12 @@ export const validateResourceCreation = [
     .withMessage('Invalid difficulty level'),
 ];
 
-/**
- * Validation for MongoDB ObjectId params
- */
 export const validateObjectId = (paramName = 'id') => [
   param(paramName)
     .isMongoId()
     .withMessage(`Invalid ${paramName}`),
 ];
 
-/**
- * Validation for pagination query params
- */
 export const validatePagination = [
   query('page')
     .optional()
@@ -135,16 +114,10 @@ export const validatePagination = [
     .withMessage('Limit must be between 1 and 100'),
 ];
 
-/**
- * Sanitize input to prevent XSS
- */
 export const sanitizeInput = [
   body('*').trim().escape(),
 ];
 
-/**
- * Validation for search queries
- */
 export const validateSearch = [
   query('query')
     .optional()

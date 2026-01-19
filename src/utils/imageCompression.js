@@ -4,12 +4,6 @@
  * Uses canvas-based compression with intelligent quality selection
  */
 
-/**
- * Compress image file to optimized base64
- * @param {File} file - Image file to compress
- * @param {Object} options - Compression options
- * @returns {Promise<string>} - Compressed base64 image
- */
 export const compressImage = async (file, options = {}) => {
   const {
     maxWidth = 1920,           // Max width for large images
@@ -98,12 +92,6 @@ export const compressImage = async (file, options = {}) => {
   });
 };
 
-/**
- * Compress image with adaptive quality based on image type
- * @param {File} file - Image file
- * @param {string} usage - Usage context ('question', 'option', 'profile')
- * @returns {Promise<string>} - Compressed base64 image
- */
 export const compressImageAdaptive = async (file, usage = 'question') => {
   // Different compression profiles for different use cases
   const profiles = {
@@ -141,12 +129,6 @@ export const compressImageAdaptive = async (file, usage = 'question') => {
   return compressImage(file, profile);
 };
 
-/**
- * Validate image file before compression
- * @param {File} file - Image file to validate
- * @param {number} maxSizeMB - Maximum file size in MB
- * @returns {Object} - Validation result {valid: boolean, error: string}
- */
 export const validateImageFile = (file, maxSizeMB = 10) => {
   // Check if file exists
   if (!file) {
@@ -174,22 +156,11 @@ export const validateImageFile = (file, maxSizeMB = 10) => {
   return { valid: true, error: null };
 };
 
-/**
- * Batch compress multiple images
- * @param {File[]} files - Array of image files
- * @param {string} usage - Usage context
- * @returns {Promise<string[]>} - Array of compressed base64 images
- */
 export const compressImagesInBatch = async (files, usage = 'question') => {
   const compressionPromises = files.map(file => compressImageAdaptive(file, usage));
   return Promise.all(compressionPromises);
 };
 
-/**
- * Get image dimensions from base64
- * @param {string} base64 - Base64 image string
- * @returns {Promise<Object>} - {width, height}
- */
 export const getImageDimensions = (base64) => {
   return new Promise((resolve, reject) => {
     const img = new Image();

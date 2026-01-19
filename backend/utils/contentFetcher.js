@@ -145,9 +145,6 @@ const calculateRelevanceScore = (item, query) => {
   return Math.max(0, Math.min(100, score));
 };
 
-/**
- * Search Google for relevant articles and tutorials
- */
 export const searchGoogleContent = async (query, category = 'tutorial') => {
   try {
     const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
@@ -191,9 +188,6 @@ export const searchGoogleContent = async (query, category = 'tutorial') => {
   }
 };
 
-/**
- * Search YouTube for video tutorials with advanced filtering
- */
 export const searchYouTubeVideos = async (query, videoType = 'all') => {
   try {
     const apiKey = process.env.YOUTUBE_API_KEY;
@@ -1083,9 +1077,6 @@ const simulateYouTubeSearch = (query) => {
   }).sort((a, b) => b.score - a.score).slice(0, 8);
 };
 
-/**
- * Estimate reading/watching time from content
- */
 export const estimateTime = (contentType, content) => {
   if (contentType === 'video-url') {
     // Try to parse duration from YouTube or default
@@ -1098,9 +1089,6 @@ export const estimateTime = (contentType, content) => {
   return Math.ceil(words / readingSpeed);
 };
 
-/**
- * Extract topics from query using simple NLP
- */
 export const extractTopics = (query) => {
   // Remove common words
   const stopWords = ['learn', 'tutorial', 'how', 'to', 'what', 'is', 'the', 'a', 'an', 'and', 'or', 'for', 'in'];
@@ -1112,9 +1100,6 @@ export const extractTopics = (query) => {
   return topics.map(topic => topic.charAt(0).toUpperCase() + topic.slice(1));
 };
 
-/**
- * Determine difficulty level from content
- */
 export const determineDifficulty = (title, description) => {
   const text = (title + ' ' + description).toLowerCase();
   
@@ -1129,9 +1114,6 @@ export const determineDifficulty = (title, description) => {
   return 'intermediate';
 };
 
-/**
- * Main function: Auto-generate learning resources organized into 4 sections
- */
 export const autoGenerateResources = async (query, preferredType = 'all', videoType = 'all') => {
   const categorizedResults = {
     academic: [],

@@ -4,10 +4,6 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useGoogleAuth, renderGoogleButton } from '../hooks/useGoogleAuth';
 
-/**
- * A modern, two-panel login component matching a specific design.
- * Features a background image in the left panel and a clean form in the right.
- */
 function Login() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();

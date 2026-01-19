@@ -11,10 +11,6 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import PersonIcon from '@mui/icons-material/Person';
 import Loader from '../../../components/Loader';
 
-/**
- * Class Roster Page for Candidates
- * Shows all students enrolled in the class (if enabled by admin)
- */
 function ClassRosterPage() {
   const { classId } = useParams();
   const navigate = useNavigate();

@@ -2,10 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../auth/contexts/AuthContext';
 
-/**
- * Join Class Page for Candidates
- * Allows candidates to join a class using an invite code
- */
 function JoinClassPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

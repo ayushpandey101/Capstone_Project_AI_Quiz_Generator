@@ -1,9 +1,5 @@
 import { useEffect } from 'react';
 
-/**
- * Custom hook to load and initialize Google Identity Services
- * Compatible with React 19
- */
 export const useGoogleAuth = (clientId) => {
   useEffect(() => {
     if (!clientId) return;
@@ -27,9 +23,6 @@ export const useGoogleAuth = (clientId) => {
   }, [clientId]);
 };
 
-/**
- * Initialize Google One Tap Sign-In
- */
 export const initializeGoogleOneTap = (clientId, callback) => {
   if (!window.google || !clientId) return;
 
@@ -45,9 +38,6 @@ export const initializeGoogleOneTap = (clientId, callback) => {
   }
 };
 
-/**
- * Render Google Sign-In Button
- */
 export const renderGoogleButton = (elementId, clientId, callback, options = {}) => {
   if (!window.google || !clientId) return false;
 

@@ -4,10 +4,6 @@ import User from '../models/User.js';
 import Class from '../models/Class.js';
 import { sendClassInvitation } from '../utils/emailService.js';
 
-/**
- * Parse uploaded Excel/CSV file and return candidate list for preview
- * POST /api/candidate/parse-file
- */
 export const parseFileForPreview = async (req, res) => {
   try {
     // Check if file was uploaded
@@ -93,10 +89,6 @@ export const parseFileForPreview = async (req, res) => {
   }
 };
 
-/**
- * Send invitation emails to a list of candidates
- * POST /api/candidate/send-invites
- */
 export const sendBulkInvites = async (req, res) => {
   try {
     const { classId, candidates } = req.body;
@@ -208,10 +200,6 @@ export const sendBulkInvites = async (req, res) => {
   }
 };
 
-/**
- * Upload Excel/CSV file and send bulk invitation emails
- * POST /api/candidate/bulk-invite
- */
 export const bulkInviteCandidates = async (req, res) => {
   try {
     const { classId } = req.body;
@@ -366,10 +354,6 @@ export const bulkInviteCandidates = async (req, res) => {
   }
 };
 
-/**
- * Download sample CSV/Excel template for email invitations
- * GET /api/candidate/download-template
- */
 export const downloadTemplate = (req, res) => {
   try {
     // Create sample data (no password field needed anymore)
@@ -404,10 +388,6 @@ export const downloadTemplate = (req, res) => {
   }
 };
 
-/**
- * Get class roster for candidates (if enabled by admin)
- * GET /api/candidate/class/:classId/roster
- */
 export const getClassRoster = async (req, res) => {
   try {
     const { classId } = req.params;
@@ -473,10 +453,6 @@ export const getClassRoster = async (req, res) => {
   }
 };
 
-/**
- * Get class leaderboard for candidates
- * GET /api/candidate/class/:classId/leaderboard
- */
 export const getClassLeaderboard = async (req, res) => {
   try {
     const { classId } = req.params;

@@ -9,10 +9,6 @@ import {
   estimateTime 
 } from '../utils/contentFetcher.js';
 
-/**
- * Search learning resources with filters
- * GET /api/learning/search
- */
 export const searchResources = async (req, res) => {
   try {
     const { 
@@ -105,10 +101,6 @@ export const searchResources = async (req, res) => {
   }
 };
 
-/**
- * Get a single learning resource by ID
- * GET /api/learning/:id
- */
 export const getResourceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -151,10 +143,6 @@ export const getResourceById = async (req, res) => {
   }
 };
 
-/**
- * Get personalized recommendations based on student's progress and quiz performance
- * GET /api/learning/recommendations
- */
 export const getRecommendations = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -233,10 +221,6 @@ export const getRecommendations = async (req, res) => {
   }
 };
 
-/**
- * Update student progress for a resource
- * PUT /api/learning/:id/progress
- */
 export const updateProgress = async (req, res) => {
   try {
     const { id } = req.params;
@@ -295,10 +279,6 @@ export const updateProgress = async (req, res) => {
   }
 };
 
-/**
- * Toggle like/unlike for a resource
- * POST /api/learning/:id/like
- */
 export const toggleLike = async (req, res) => {
   try {
     const { id } = req.params;
@@ -341,10 +321,6 @@ export const toggleLike = async (req, res) => {
   }
 };
 
-/**
- * Get all unique subjects from resources
- * GET /api/learning/subjects
- */
 export const getSubjects = async (req, res) => {
   try {
     const subjects = await LearningResource.distinct('subject', { isPublic: true });
@@ -362,10 +338,6 @@ export const getSubjects = async (req, res) => {
   }
 };
 
-/**
- * Get student's learning progress summary
- * GET /api/learning/my-progress
- */
 export const getMyProgress = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -399,10 +371,6 @@ export const getMyProgress = async (req, res) => {
   }
 };
 
-/**
- * Create a new learning resource (Admin only)
- * POST /api/learning
- */
 export const createResource = async (req, res) => {
   try {
     // Check if user is admin
@@ -435,10 +403,6 @@ export const createResource = async (req, res) => {
   }
 };
 
-/**
- * Update a learning resource (Admin only)
- * PUT /api/learning/:id
- */
 export const updateResource = async (req, res) => {
   try {
     // Check if user is admin
@@ -477,11 +441,6 @@ export const updateResource = async (req, res) => {
   }
 };
 
-/**
- * Delete a learning resource from user's library
- * DELETE /api/learning/:id
- * Permanently removes the resource from database
- */
 export const deleteResource = async (req, res) => {
   try {
     const { id } = req.params;
@@ -522,10 +481,6 @@ export const deleteResource = async (req, res) => {
   }
 };
 
-/**
- * Get archived resources for current user
- * GET /api/learning/archived
- */
 export const getArchivedResources = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -558,10 +513,6 @@ export const getArchivedResources = async (req, res) => {
   }
 };
 
-/**
- * Auto-generate learning resources from web search
- * POST /api/learning/auto-generate
- */
 export const autoGenerate = async (req, res) => {
   try {
     const { query, preferredType = 'all', videoType = 'all' } = req.body;
@@ -613,10 +564,6 @@ export const autoGenerate = async (req, res) => {
   }
 };
 
-/**
- * Save auto-generated resource to database
- * POST /api/learning/save-generated
- */
 export const saveGeneratedResource = async (req, res) => {
   try {
     const resourceData = {

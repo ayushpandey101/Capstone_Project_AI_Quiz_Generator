@@ -1,4 +1,3 @@
-// Admin Layout Component
 import React, { useState } from 'react';
 import { Box, Drawer, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet } from 'react-router-dom';

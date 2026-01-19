@@ -6,10 +6,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Quiz from '../models/Quiz.js';
 
-/**
- * Generate quiz based on prompt and save to database
- * POST /api/quiz/generate
- */
 export const generateQuiz = async (req, res) => {
   try {
     // 1. Get the prompt and adminId from the request
@@ -334,11 +330,6 @@ export const generateQuiz = async (req, res) => {
   }
 };
 
-/**
- * Get all quizzes created by the authenticated admin
- * GET /api/quiz
- * Supports optional ?limit=N query parameter to limit results
- */
 export const getQuizzes = async (req, res) => {
   try {
     const adminId = req.user?.id || req.user?._id;
@@ -380,10 +371,6 @@ export const getQuizzes = async (req, res) => {
   }
 };
 
-/**
- * Get a single quiz by ID
- * GET /api/quiz/:id
- */
 export const getQuizById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -420,10 +407,6 @@ export const getQuizById = async (req, res) => {
   }
 };
 
-/**
- * Delete a quiz
- * DELETE /api/quiz/:id
- */
 export const deleteQuiz = async (req, res) => {
   try {
     const { id } = req.params;
@@ -466,10 +449,6 @@ export const deleteQuiz = async (req, res) => {
   }
 };
 
-/**
- * Update a quiz
- * PUT /api/quiz/:id
- */
 export const updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
@@ -525,10 +504,6 @@ export const updateQuiz = async (req, res) => {
   }
 };
 
-/**
- * Create a quiz manually
- * POST /api/quiz/manual
- */
 export const createManualQuiz = async (req, res) => {
   try {
     const { title, questions, timeLimit, subgroup } = req.body;

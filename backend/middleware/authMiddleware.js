@@ -1,9 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-/**
- * Protect routes - Check if user is authenticated
- */
 export const protect = async (req, res, next) => {
   let token;
 
@@ -53,10 +50,6 @@ export const protect = async (req, res, next) => {
   }
 };
 
-/**
- * Authorize roles - Check if user has required role
- * @param  {...String} roles - Allowed roles
- */
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -69,9 +62,6 @@ export const authorize = (...roles) => {
   };
 };
 
-/**
- * Optional authentication - Attach user if token exists, but don't require it
- */
 export const optionalAuth = async (req, res, next) => {
   let token;
 

@@ -1,9 +1,5 @@
 import Class from '../models/Class.js';
 
-/**
- * Create a new class
- * POST /api/classes
- */
 export const createClass = async (req, res) => {
   try {
     const { title, courseCode, description } = req.body;
@@ -54,11 +50,6 @@ export const createClass = async (req, res) => {
   }
 };
 
-/**
- * Get all classes for the current user
- * GET /api/classes
- * Supports optional ?limit=N query parameter to limit results
- */
 export const getClasses = async (req, res) => {
   try {
     // Get adminId from authenticated user
@@ -102,10 +93,6 @@ export const getClasses = async (req, res) => {
   }
 };
 
-/**
- * Get a single class by ID with full details (including populated student roster)
- * GET /api/classes/:id
- */
 export const getClassById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -161,10 +148,6 @@ export const getClassById = async (req, res) => {
   }
 };
 
-/**
- * Update a class
- * PUT /api/classes/:id
- */
 export const updateClass = async (req, res) => {
   try {
     const { id } = req.params;
@@ -239,10 +222,6 @@ export const updateClass = async (req, res) => {
   }
 };
 
-/**
- * Delete a class (hard delete - permanently removes from database)
- * DELETE /api/classes/:id
- */
 export const deleteClass = async (req, res) => {
   try {
     const { id } = req.params;
@@ -283,10 +262,6 @@ export const deleteClass = async (req, res) => {
   }
 };
 
-/**
- * Join a class using invite code
- * POST /api/classes/join
- */
 export const joinClass = async (req, res) => {
   try {
     
@@ -364,10 +339,6 @@ export const joinClass = async (req, res) => {
   }
 };
 
-/**
- * Remove a student from a class
- * POST /api/classes/:id/remove-student
- */
 export const removeStudentFromClass = async (req, res) => {
   try {
     const { id } = req.params;
@@ -449,10 +420,6 @@ export const removeStudentFromClass = async (req, res) => {
   }
 };
 
-/**
- * Get all classes a candidate is enrolled in
- * GET /api/candidate/my-classes
- */
 export const getCandidateClasses = async (req, res) => {
   try {
     const candidateId = req.user?.id || req.user?._id;
@@ -492,10 +459,6 @@ export const getCandidateClasses = async (req, res) => {
   }
 };
 
-/**
- * Regenerate invite code for a class
- * PATCH /api/classes/:id/regenerate-invite
- */
 export const regenerateInviteCode = async (req, res) => {
   try {
     const { id } = req.params;

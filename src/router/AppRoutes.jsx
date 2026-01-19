@@ -37,10 +37,6 @@ import ClassLeaderboardPage from '../features/candidate/pages/ClassLeaderboardPa
 import LearningHubPage from '../features/candidate/pages/LearningHubPage';
 import CandidateClassDetailsPage from '../features/candidate/pages/CandidateClassDetailsPage';
 
-/**
- * Centralized router configuration
- * Following React Router best practices for nested routes
- */
 const AppRoutes = () => {
   return (
     <ThemeProvider theme={theme}>

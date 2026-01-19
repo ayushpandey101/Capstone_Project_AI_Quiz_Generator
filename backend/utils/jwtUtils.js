@@ -1,21 +1,11 @@
 import jwt from 'jsonwebtoken';
 
-/**
- * Generate JWT token
- * @param {Object} payload - User data to include in token
- * @returns {String} JWT token
- */
 export const generateToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '7d',
   });
 };
 
-/**
- * Verify JWT token
- * @param {String} token - JWT token to verify
- * @returns {Object} Decoded token payload
- */
 export const verifyToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET);
@@ -24,13 +14,6 @@ export const verifyToken = (token) => {
   }
 };
 
-/**
- * Send token in response (cookie + JSON)
- * @param {Object} user - User object
- * @param {Number} statusCode - HTTP status code
- * @param {Object} res - Express response object
- * @param {String} message - Optional success message
- */
 export const sendTokenResponse = (user, statusCode, res, message = 'Success') => {
   // Generate token
   const token = generateToken(user.getAuthPayload());

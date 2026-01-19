@@ -3,11 +3,6 @@ import { sendTokenResponse } from '../utils/jwtUtils.js';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from '../config/email.js';
 
-/**
- * @desc    Register new user
- * @route   POST /api/auth/register
- * @access  Public
- */
 export const register = async (req, res) => {
   try {
     const { name, email, password, role, registrationNumber } = req.body;
@@ -68,11 +63,6 @@ export const register = async (req, res) => {
   }
 };
 
-/**
- * @desc    Login user
- * @route   POST /api/auth/login
- * @access  Public
- */
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -135,11 +125,6 @@ export const login = async (req, res) => {
   }
 };
 
-/**
- * @desc    Logout user
- * @route   POST /api/auth/logout
- * @access  Private
- */
 export const logout = async (req, res) => {
   try {
     // Clear cookie
@@ -160,11 +145,6 @@ export const logout = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get current logged in user
- * @route   GET /api/auth/me
- * @access  Private
- */
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -181,11 +161,6 @@ export const getMe = async (req, res) => {
   }
 };
 
-/**
- * @desc    Google OAuth Success Handler
- * @route   GET /api/auth/google/callback (handled by passport)
- * @access  Public
- */
 export const googleAuthSuccess = async (req, res) => {
   try {
     // User is already authenticated by passport
@@ -204,21 +179,11 @@ export const googleAuthSuccess = async (req, res) => {
   }
 };
 
-/**
- * @desc    Google OAuth Failure Handler
- * @route   GET /api/auth/google/callback (on failure)
- * @access  Public
- */
 export const googleAuthFailure = (req, res) => {
   const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
   res.redirect(`${frontendURL}/auth/error?message=${encodeURIComponent('Google authentication failed')}`);
 };
 
-/**
- * @desc    Update user profile
- * @route   PUT /api/auth/update-profile
- * @access  Private
- */
 export const updateProfile = async (req, res) => {
   try {
     const { name } = req.body;
@@ -251,11 +216,6 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-/**
- * @desc    Change user password
- * @route   PUT /api/auth/change-password
- * @access  Private
- */
 export const changePassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
@@ -319,11 +279,6 @@ export const changePassword = async (req, res) => {
   }
 };
 
-/**
- * @desc    Upload user avatar
- * @route   POST /api/auth/upload-avatar
- * @access  Private
- */
 export const uploadAvatar = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -366,11 +321,6 @@ export const uploadAvatar = async (req, res) => {
   }
 };
 
-/**
- * @desc    Request password reset
- * @route   POST /api/auth/forgot-password
- * @access  Public
- */
 export const forgotPassword = async (req, res) => {
   try {
     
@@ -461,11 +411,6 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-/**
- * @desc    Reset password using token
- * @route   POST /api/auth/reset-password/:token
- * @access  Public
- */
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
