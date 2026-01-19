@@ -161,7 +161,7 @@ const EditQuizModal = ({ open, onClose, quiz, onSave, token }) => {
         }, 500);
         
       } catch (error) {
-        console.error('Image compression error:', error);
+
         setError('Failed to compress image. Please try again with a different image.');
         setIsCompressing(false);
         setCompressionProgress(0);
@@ -192,14 +192,7 @@ const EditQuizModal = ({ open, onClose, quiz, onSave, token }) => {
       setError('At least one question is required');
       return false;
     }
-    if (weightageType === 'percentage' && (weightage < 0 || weightage > 100)) {
-      setError('Weightage percentage must be between 0 and 100.');
-      return false;
-    }
-    if (weightageType === 'marks' && weightage < 0) {
-      setError('Weightage marks must be zero or a positive number.');
-      return false;
-    }
+    // Note: weightage is set when assigning quiz to class, not here
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       if (!q.text.trim()) {
@@ -276,10 +269,10 @@ const EditQuizModal = ({ open, onClose, quiz, onSave, token }) => {
         onSave(result.data || quiz);
       } else {
         setError(result.message || 'Failed to save quiz');
-        console.error('Quiz save failed:', result);
+
       }
     } catch (err) {
-      console.error('Quiz save error:', err);
+
       setError(`Failed to save quiz: ${err.message}`);
     } finally {
       setIsSaving(false);

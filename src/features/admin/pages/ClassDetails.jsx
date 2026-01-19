@@ -8,6 +8,7 @@ import ResultsTab from '../components/ResultsTab';
 import ClassAnalytics from '../components/ClassAnalytics';
 import ClassSettingsTab from '../components/ClassSettingsTab';
 import IntegrityMonitorTab from '../components/IntegrityMonitorTab';
+import MessagesTab from '../components/MessagesTab';
 import { useAuth } from '../../auth/contexts/AuthContext';
 import Loader from '../../../components/Loader';
 
@@ -35,6 +36,9 @@ const ClassDetails = () => {
   const [searchParams] = useSearchParams();
   const { token } = useAuth();
   
+  // Get messageId from URL if present (for notification navigation)
+  const messageId = searchParams.get('messageId');
+  
   // Get the tab from URL parameters (e.g., ?tab=results)
   const getInitialTab = () => {
     const tabParam = searchParams.get('tab');
@@ -45,7 +49,8 @@ const ClassDetails = () => {
       'results': 3,
       'analytics': 4,
       'integrity': 5,
-      'settings': 6
+      'messages': 6,
+      'settings': 7
     };
     return tabMap[tabParam] || 0; // Default to Roster (0) if no valid tab param
   };
@@ -90,6 +95,35 @@ const ClassDetails = () => {
     }
   }, [classId, token]);
 
+  // Clear notifications when switching to Messages tab (tab index 6)
+  useEffect(() => {
+    const clearNotifications = async () => {
+      if (currentTab === 6 && token && classId) {
+        // Small delay to ensure MessagesTab is fully rendered
+        setTimeout(async () => {
+          try {
+            await fetch(
+              `http://localhost:5000/api/classes/${classId}/messages/read-all`,
+              {
+                method: 'PUT',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+            // Trigger immediate notification refresh
+            window.dispatchEvent(new Event('refreshNotifications'));
+          } catch (error) {
+            // Error clearing notifications
+          }
+        }, 300);
+      }
+    };
+
+    clearNotifications();
+  }, [currentTab, classId, token]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -111,22 +145,67 @@ const ClassDetails = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       {/* 1. Class Header - Using real data */}
-      <Typography variant="h4">{classData.title}</Typography>
-      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-        Course Code: {classData.courseCode}
-      </Typography>
+      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+        <Typography 
+          variant="h4"
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2rem' },
+            fontWeight: 'bold',
+            mb: 0.5
+          }}
+        >
+          {classData.title}
+        </Typography>
+        <Typography 
+          variant="subtitle1" 
+          color="text.secondary" 
+          gutterBottom
+          sx={{
+            fontSize: { xs: '0.875rem', sm: '1rem' }
+          }}
+        >
+          Course Code: {classData.courseCode}
+        </Typography>
+      </Box>
 
       {/* 2. Navigation Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={currentTab} onChange={handleChange}>
+      <Box sx={{ 
+        borderBottom: 1, 
+        borderColor: 'divider',
+        overflowX: 'auto',
+        '&::-webkit-scrollbar': {
+          height: 4,
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.2)',
+          borderRadius: 2,
+        },
+      }}>
+        <Tabs 
+          value={currentTab} 
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{
+            minHeight: { xs: 40, sm: 48 },
+            '& .MuiTab-root': {
+              minHeight: { xs: 40, sm: 48 },
+              fontSize: { xs: '0.813rem', sm: '0.875rem' },
+              minWidth: { xs: 80, sm: 100 },
+              px: { xs: 1.5, sm: 2 },
+            },
+          }}
+        >
           <Tab label="Roster" />
           <Tab label="Assignments" />
           <Tab label="Quizzes" />
           <Tab label="Results" />
           <Tab label="Analytics" />
           <Tab label="Integrity Monitor" />
+          <Tab label="Messages" />
           <Tab label="Settings" />
         </Tabs>
       </Box>
@@ -161,6 +240,9 @@ const ClassDetails = () => {
         <IntegrityMonitorTab classId={classId} />
       </TabPanel>
       <TabPanel value={currentTab} index={6}>
+        <MessagesTab classId={classId} highlightMessageId={messageId} />
+      </TabPanel>
+      <TabPanel value={currentTab} index={7}>
         <ClassSettingsTab classData={classData} onClassUpdated={fetchClassDetails} />
       </TabPanel>
     </Box>

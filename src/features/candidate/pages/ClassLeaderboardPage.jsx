@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/contexts/AuthContext';
-import { Trophy, ArrowLeft, AlertCircle, Medal, TrendingUp } from 'lucide-react';
+import { 
+  Box, Typography, Button, Paper, Grid, Divider,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import TrophyIcon from '@mui/icons-material/EmojiEvents';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import Loader from '../../../components/Loader';
 
 /**
@@ -48,177 +55,268 @@ function ClassLeaderboardPage() {
   }, [token, classId]);
 
   const getRankDisplay = (rank) => {
-    if (rank === 1) return { icon: '🥇', color: 'text-yellow-600', bgColor: 'bg-yellow-50' };
-    if (rank === 2) return { icon: '🥈', color: 'text-gray-600', bgColor: 'bg-gray-50' };
-    if (rank === 3) return { icon: '🥉', color: 'text-orange-600', bgColor: 'bg-orange-50' };
-    return { icon: null, color: 'text-gray-700', bgColor: 'bg-white' };
+    if (rank === 1) return { icon: '🥇', color: '#000000', bgColor: '#fef3c7' };
+    if (rank === 2) return { icon: '🥈', color: '#000000', bgColor: '#f3f4f6' };
+    if (rank === 3) return { icon: '🥉', color: '#000000', bgColor: '#fed7aa' };
+    return { icon: null, color: '#000000', bgColor: '#ffffff' };
   };
 
   return (
-    <div className="p-6">
-      <div className="max-w-5xl mx-auto">
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
         {/* Back Button */}
-        <button
-          onClick={() => navigate(`/candidate/class/${classId}/assignments`)}
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(`/candidate/class/${classId}`)}
+          sx={{
+            color: '#000000',
+            mb: { xs: 3, sm: 4 },
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+          }}
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-medium">Back to Assignments</span>
-        </button>
+          Back to Assignments
+        </Button>
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="text-center py-12">
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
             <Loader />
-          </div>
+          </Box>
         ) : error ? (
           // Error State
-          <div className="bg-white rounded-xl border border-red-200 p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Unable to View Leaderboard</h3>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 8, 
+              textAlign: 'center',
+              border: '2px solid',
+              borderColor: '#fecaca',
+              borderRadius: 2
+            }}
+          >
+            <ErrorOutlineIcon sx={{ fontSize: 64, color: '#f87171', mb: 2 }} />
+            <Typography variant="h5" fontWeight="600" gutterBottom sx={{ color: '#1f2937' }}>
+              Unable to View Leaderboard
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {error}
+            </Typography>
+            <Button
+              startIcon={<ArrowBackIcon />}
               onClick={() => navigate(`/candidate/class/${classId}/assignments`)}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
+              variant="contained"
+              sx={{
+                bgcolor: '#000000',
+                '&:hover': { bgcolor: '#1f2937' }
+              }}
             >
-              <ArrowLeft className="w-4 h-4" />
               Back to Assignments
-            </button>
-          </div>
+            </Button>
+          </Paper>
         ) : (
           <>
             {/* Page Header */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg">
-                  <Trophy className="w-5 h-5 text-white" />
-                </div>
-                <h1 className="text-3xl font-semibold text-gray-800">
+            <Box sx={{ mb: { xs: 3, sm: 4 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                <Box 
+                  sx={{ 
+                    p: 1.5, 
+                    background: 'linear-gradient(135deg, #000000 0%, #374151 100%)',
+                    borderRadius: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <TrophyIcon sx={{ fontSize: 24, color: '#ffffff' }} />
+                </Box>
+                <Typography variant="h4" fontWeight="600" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                   Class Leaderboard
-                </h1>
-              </div>
-              <p className="text-gray-500 text-sm ml-14">
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ ml: { xs: 0, sm: 7 }, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
                 Rankings based on overall performance in {leaderboardData?.classTitle}
-              </p>
-            </div>
+              </Typography>
+            </Box>
 
             {/* Class Info Card */}
-            <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Course Code</p>
-                  <p className="font-mono text-sm font-medium text-gray-900">{leaderboardData?.courseCode}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Total Students</p>
-                  <p className="text-sm font-medium text-gray-900">{leaderboardData?.rankings?.length || 0}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Candidate Rank</p>
-                  <p className="text-sm font-bold text-blue-600">
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: { xs: 3, sm: 4 }, 
+                mb: 3, 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2
+              }}
+            >
+              <Grid container spacing={{ xs: 2, sm: 3 }}>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Course Code
+                  </Typography>
+                  <Typography variant="body2" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
+                    {leaderboardData?.courseCode}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Total Students
+                  </Typography>
+                  <Typography variant="body2" fontWeight="600">
+                    {leaderboardData?.rankings?.length || 0}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Candidate Rank
+                  </Typography>
+                  <Typography variant="body2" fontWeight="700" color="#000000">
                     #{leaderboardData?.currentUserRank || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Your Avg Score</p>
-                  <p className="text-sm font-bold text-green-600">
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Your Avg Score
+                  </Typography>
+                  <Typography variant="body2" fontWeight="700" color="#000000">
                     {leaderboardData?.currentUserScore !== undefined ? leaderboardData.currentUserScore.toFixed(1) + '%' : 'N/A'}
-                  </p>
-                </div>
-              </div>
-            </div>
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Paper>
 
             {/* Leaderboard List */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-yellow-50 to-orange-50">
-                <h2 className="text-xl font-semibold text-gray-900">Rankings</h2>
-              </div>
+            <Paper 
+              elevation={0}
+              sx={{ 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+                overflow: 'hidden'
+              }}
+            >
+              <Box 
+                sx={{ 
+                  px: 3, 
+                  py: 2, 
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: '#f3f4f6'
+                }}
+              >
+                <Typography variant="h6" fontWeight="600" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                  Rankings
+                </Typography>
+              </Box>
               
               {leaderboardData?.rankings?.length === 0 ? (
-                <div className="p-12 text-center">
-                  <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">No rankings available yet</p>
-                </div>
+                <Box sx={{ p: 12, textAlign: 'center' }}>
+                  <TrendingUpIcon sx={{ fontSize: 48, color: '#d1d5db', mb: 3 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    No rankings available yet
+                  </Typography>
+                </Box>
               ) : (
-                <div className="divide-y divide-gray-200">
-                  {leaderboardData?.rankings?.map((student) => {
-                    const rankStyle = getRankDisplay(student.rank);
-                    const isCurrentUser = student.userId === user?._id;
-                    
-                    return (
-                      <div 
-                        key={student.userId}
-                        className={`px-6 py-4 transition-colors ${
-                          isCurrentUser 
-                            ? 'bg-blue-50 border-l-4 border-blue-500' 
-                            : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          {/* Left: Rank, Medal, and Name */}
-                          <div className="flex items-center gap-4 flex-1 min-w-0">
-                            {/* Rank/Medal */}
-                            <div className="flex-shrink-0 w-12 text-center">
-                              {rankStyle.icon ? (
-                                <span className="text-2xl">{rankStyle.icon}</span>
-                              ) : (
-                                <span className={`text-lg font-bold ${rankStyle.color}`}>
-                                  #{student.rank}
-                                </span>
-                              )}
-                            </div>
-                            
-                            {/* Name */}
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-base font-medium truncate ${
-                                isCurrentUser ? 'text-blue-900' : 'text-gray-900'
-                              }`}>
-                                {student.name}
-                                {isCurrentUser && (
-                                  <span className="ml-2 text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
-                                    You
-                                  </span>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <Table sx={{ minWidth: { xs: 600, md: 'auto' } }}>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, width: 80 }}>Rank</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Student</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 600 }}>Completed</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 600 }}>Avg Score</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {leaderboardData?.rankings?.map((student) => {
+                        const rankStyle = getRankDisplay(student.rank);
+                        const isCurrentUser = student.userId === user?._id;
+                        
+                        return (
+                          <TableRow 
+                            key={student.userId}
+                            sx={{
+                              bgcolor: isCurrentUser ? '#eff6ff' : 'inherit',
+                              borderLeft: isCurrentUser ? '4px solid #3b82f6' : 'none',
+                              '&:hover': {
+                                bgcolor: isCurrentUser ? '#dbeafe' : 'rgba(0,0,0,0.02)'
+                              }
+                            }}
+                          >
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {rankStyle.icon ? (
+                                  <Typography sx={{ fontSize: '1.5rem' }}>{rankStyle.icon}</Typography>
+                                ) : (
+                                  <Typography fontWeight="700" sx={{ color: rankStyle.color }}>
+                                    #{student.rank}
+                                  </Typography>
                                 )}
-                              </p>
-                              <p className="text-xs text-gray-500 font-mono mt-0.5">
-                                {student.registrationNumber}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          {/* Right: Stats */}
-                          <div className="flex items-center gap-6 flex-shrink-0">
-                            {/* Completed Assignments */}
-                            <div className="text-center">
-                              <p className="text-xs text-gray-500 mb-0.5">Completed</p>
-                              <p className="text-sm font-semibold text-gray-900">
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Typography 
+                                    variant="body2" 
+                                    fontWeight="600"
+                                    sx={{ color: isCurrentUser ? '#1e40af' : '#1f2937' }}
+                                  >
+                                    {student.name}
+                                  </Typography>
+                                  {isCurrentUser && (
+                                    <Chip 
+                                      label="You" 
+                                      size="small" 
+                                      sx={{ 
+                                        height: 20, 
+                                        fontSize: '0.65rem',
+                                        bgcolor: '#3b82f6',
+                                        color: '#ffffff'
+                                      }} 
+                                    />
+                                  )}
+                                </Box>
+                                <Typography 
+                                  variant="caption" 
+                                  color="text.secondary"
+                                  sx={{ fontFamily: 'monospace', mt: 0.5, display: 'block' }}
+                                >
+                                  {student.registrationNumber}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Typography variant="body2" fontWeight="600">
                                 {student.completedAssignments}/{student.totalAssignments}
-                              </p>
-                            </div>
-                            
-                            {/* Average Score */}
-                            <div className="text-center min-w-[80px]">
-                              <p className="text-xs text-gray-500 mb-0.5">Avg Score</p>
-                              <p className={`text-lg font-bold ${
-                                student.averageScore >= 80 ? 'text-green-600' :
-                                student.averageScore >= 60 ? 'text-yellow-600' :
-                                'text-red-600'
-                              }`}>
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Typography 
+                                variant="body1" 
+                                fontWeight="700"
+                                sx={{
+                                  color: student.averageScore >= 80 ? '#16a34a' :
+                                         student.averageScore >= 60 ? '#ca8a04' :
+                                         '#dc2626'
+                                }}
+                              >
                                 {student.averageScore.toFixed(1)}%
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </Box>
               )}
-            </div>
+            </Paper>
           </>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

@@ -129,9 +129,13 @@ export const getClassById = async (req, res) => {
       });
     }
 
-    // 2. Security Check: Make sure the user requesting it is the owner
-    //    Only the admin who created the class should see the full roster
-    if (classData.adminId._id.toString() !== userId.toString()) {
+    // 2. Security Check: Make sure the user requesting it is either the owner or an enrolled student
+    const isAdmin = classData.adminId._id.toString() === userId.toString();
+    const isEnrolledStudent = classData.students.some(
+      student => student._id.toString() === userId.toString()
+    );
+    
+    if (!isAdmin && !isEnrolledStudent) {
       
       return res.status(403).json({
         success: false,
@@ -174,7 +178,9 @@ export const updateClass = async (req, res) => {
       autoGrading,
       showResults,
       showRosterToCandidates,
-      showLeaderboardToCandidates
+      showLeaderboardToCandidates,
+      messagingEnabled,
+      allowStudentMessages
     } = req.body;
 
     // First, find the class to check ownership
@@ -208,6 +214,8 @@ export const updateClass = async (req, res) => {
     if (showResults !== undefined) updateData.showResults = showResults;
     if (showRosterToCandidates !== undefined) updateData.showRosterToCandidates = showRosterToCandidates;
     if (showLeaderboardToCandidates !== undefined) updateData.showLeaderboardToCandidates = showLeaderboardToCandidates;
+    if (messagingEnabled !== undefined) updateData.messagingEnabled = messagingEnabled;
+    if (allowStudentMessages !== undefined) updateData.allowStudentMessages = allowStudentMessages;
 
     // Now update the class
     const updatedClass = await Class.findByIdAndUpdate(

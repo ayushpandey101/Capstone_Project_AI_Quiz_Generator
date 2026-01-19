@@ -1,11 +1,12 @@
 // Candidate Layout Component
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  Box, AppBar, Toolbar, Typography, List, ListItem, 
+  Box, Toolbar, Typography, List, ListItem, 
   ListItemButton, ListItemText, Drawer, Button, IconButton,
   Menu, MenuItem, Divider, ListItemIcon, Avatar, Dialog,
-  DialogTitle, DialogContent, DialogContentText, DialogActions
+  DialogTitle, DialogContent, DialogContentText, DialogActions, useMediaQuery, useTheme,
+  TextField, InputAdornment, Badge, Tooltip
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
@@ -14,34 +15,29 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import ClassIcon from '@mui/icons-material/Class';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import PersonIcon from '@mui/icons-material/Person';
+import SchoolIcon from '@mui/icons-material/School';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import SearchIcon from '@mui/icons-material/Search';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationBell from '../../../shared/components/NotificationBell';
 import { useAuth } from '../../auth/contexts/AuthContext';
-import lightLogo from '../../../assets/light_mode_theodoraQ_logo.svg';
-import darkLogo from '../../../assets/dark_mode_theodoraQ_logo.svg';
 
-const drawerWidth = 240;
+const sidebarWidth = 240;
+const leftGap = 16;
 
 const CandidateLayout = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-  const [isMobile, setIsMobile] = React.useState(false);
+  const location = useLocation();
+  const theme = useTheme();
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false);
 
-  // Check if mobile on mount and window resize
-  React.useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 900;
-      setIsMobile(mobile);
-      if (mobile) {
-        setIsSidebarOpen(false);
-      }
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -75,90 +71,323 @@ const CandidateLayout = () => {
     { text: 'Dashboard', path: '/candidate/dashboard', icon: <DashboardIcon /> },
     { text: 'My Classes', path: '/candidate/my-classes', icon: <ClassIcon /> },
     { text: 'Join a Class', path: '/candidate/join-class', icon: <AddCircleIcon /> },
+    { text: 'Learning Hub', path: '/candidate/learning-hub', icon: <SchoolIcon /> },
   ];
 
   const handleNavigation = (path) => {
     navigate(path);
-    if (isMobile) {
-      setIsSidebarOpen(false);
+    if (mobileOpen) {
+      setMobileOpen(false);
     }
   };
 
+  const Sidebar = () => (
+    <Box
+      sx={{
+        width: sidebarWidth,
+        height: isMobile ? '100vh' : 'calc(100vh - 32px)',
+        bgcolor: '#ffffff',
+        color: '#1f2937',
+        position: isMobile ? 'relative' : 'fixed',
+        left: isMobile ? 0 : 16,
+        top: isMobile ? 0 : 16,
+        display: 'flex',
+        flexDirection: 'column',
+        zIndex: 1200,
+        overflow: 'hidden',
+        borderRadius: isMobile ? 0 : 1,
+        border: isMobile ? 'none' : '1px solid #e5e7eb',
+        boxShadow: isMobile ? 'none' : '2px 0 8px rgba(0,0,0,0.05)',
+      }}
+    >
+      {/* Logo */}
+      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 64, borderBottom: '1px solid #e5e7eb' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, overflow: 'hidden' }}>
+          <Box 
+            sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+            }}
+          >
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontFamily: '"Poppins", "Inter", sans-serif',
+                fontWeight: 900, 
+                fontSize: '26px', 
+                background: 'linear-gradient(135deg, #000000 0%, #374151 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                letterSpacing: '-0.5px',
+                textTransform: 'uppercase',
+                textShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -4,
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  background: 'linear-gradient(90deg, transparent, #000000, transparent)',
+                  borderRadius: '2px',
+                }
+              }}
+            >
+              THEODORAQ
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Menu Items */}
+      <List sx={{ px: 1.5, flexGrow: 1, overflowY: 'auto' }}>
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => handleNavigation(item.path)}
+                sx={{
+                  borderRadius: '6px',
+                  minHeight: 44,
+                  justifyContent: 'initial',
+                  px: 2,
+                  bgcolor: isActive ? '#000000' : 'transparent',
+                  color: isActive ? '#ffffff' : '#6b7280',
+                  '&:hover': {
+                    bgcolor: isActive ? '#1f2937' : 'rgba(0,0,0,0.04)',
+                    color: isActive ? '#ffffff' : '#000000',
+                  },
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 0, mr: 2, justifyContent: 'center', color: 'inherit' }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.text} sx={{ '& .MuiTypography-root': { fontSize: '0.8125rem', fontWeight: 500 } }} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </List>
+
+      <Divider sx={{ borderColor: '#e5e7eb' }} />
+
+      {/* Get Help & Logout */}
+      <List sx={{ px: 1.5, py: 1 }}>
+        <ListItem disablePadding sx={{ mb: 0.5 }}>
+          <ListItemButton 
+            onClick={() => handleNavigation('/candidate/help')} 
+            sx={{ 
+              borderRadius: '6px', 
+              minHeight: 44, 
+              justifyContent: 'initial', 
+              px: 2, 
+              color: '#6b7280', 
+              '&:hover': { 
+                bgcolor: 'rgba(0,0,0,0.04)', 
+                color: '#000000' 
+              } 
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 0, mr: 2, justifyContent: 'center', color: 'inherit' }}>
+              <HelpOutlineIcon />
+            </ListItemIcon>
+            <ListItemText primary="Get Help" sx={{ '& .MuiTypography-root': { fontSize: '0.8125rem', fontWeight: 500 } }} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => setLogoutDialogOpen(true)} sx={{ borderRadius: '6px', minHeight: 44, justifyContent: 'initial', px: 2, color: '#6b7280', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.05)', color: '#ef4444' } }}>
+            <ListItemIcon sx={{ minWidth: 0, mr: 2, justifyContent: 'center', color: 'inherit' }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" sx={{ '& .MuiTypography-root': { fontSize: '0.8125rem', fontWeight: 500 } }} />
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </Box>
+  );
+
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Top Navbar */}
-      <AppBar 
-        position="fixed" 
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f3f4f6' }}>
+      
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: sidebarWidth,
+            border: 'none',
+          },
+        }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Sidebar />
+      </Drawer>
+
+      {/* Desktop Static Sidebar */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Sidebar />
+      </Box>
+
+      {/* Right Side Content with Top Navbar */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          ml: { xs: 0, md: `${sidebarWidth + leftGap}px` },
+          minWidth: 0,
+          width: { xs: '100%', md: `calc(100% - ${sidebarWidth + leftGap}px)` },
+          display: 'flex',
+          flexDirection: 'column',
+          p: { xs: 1, sm: 2 },
+        }}
+      >
+        {/* Top Navbar */}
+        <Box
+          sx={{
+            height: { xs: 56, sm: 64 },
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+            display: 'flex',
+            alignItems: 'center',
+            px: { xs: 1.5, sm: 3 },
+            gap: { xs: 1, sm: 2 },
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            mb: 2,
+          }}
+        >
+          {/* Hamburger Menu Button - Mobile Only */}
+          {isMobile && (
             <IconButton
-              color="inherit"
-              edge="start"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              sx={{ mr: 2 }}
+              onClick={handleDrawerToggle}
+              size="medium"
+              sx={{
+                color: '#000000',
+                mr: 1,
+                '&:hover': {
+                  bgcolor: 'rgba(0,0,0,0.04)',
+                },
+              }}
             >
               <MenuIcon />
             </IconButton>
-            <Box
-              component="img"
-              src={lightLogo}
-              alt="TheodoraQ Logo"
-              sx={{
-                height: 56,
-                width: 'auto',
-                mr: 1.5,
-                display: { xs: 'none', sm: 'block' }
-              }}
-            />
-            <Box
-              component="img"
-              src={lightLogo}
-              alt="TheodoraQ"
-              sx={{
-                height: 44,
-                width: 'auto',
-                mr: 1,
-                display: { xs: 'block', sm: 'none' }
-              }}
-            />
-            <Typography 
-              variant="h6" 
-              noWrap
+          )}
+
+          {/* Search Bar */}
+          <TextField
+            placeholder="Search classes, assignments..."
+            size="small"
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              width: { md: 300, lg: 400 },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1,
+                bgcolor: '#f3f4f6',
+                fontSize: '0.875rem',
+                '& fieldset': {
+                  borderColor: 'transparent',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#d1d5db',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#000000',
+                  borderWidth: '1px',
+                },
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ fontSize: 20, color: '#6b7280' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          {/* Right Side - User Menu */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: { xs: 0.5, sm: 1.5 },
+            ml: 'auto'
+          }}>
+            {/* Notifications */}
+            <NotificationBell />
+
+            {/* User Avatar with Name and Arrow */}
+            <Box 
+              onClick={handleMenuOpen}
               sx={{ 
-                display: { xs: 'none', md: 'block' },
-                fontWeight: 'bold',
-                letterSpacing: 0.5,
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: { xs: 0.75, sm: 1.5 },
+                cursor: 'pointer',
+                p: { xs: 0.5, sm: 0.75 },
+                pl: { xs: 0.75, sm: 2 },
+                pr: { xs: 0.5, sm: 1.5 },
+                minWidth: { xs: 'auto', sm: 180 },
+                borderRadius: 3,
+                border: '1px solid',
+                borderColor: 'divider',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                },
+                transition: 'all 0.2s'
               }}
             >
-              TheodoraQ
-            </Typography>
-          </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {user && (
+              <Avatar
+                src={user?.profilePicture?.startsWith('http') ? user.profilePicture : `http://localhost:5000${user?.profilePicture}`}
+                sx={{
+                  width: { xs: 28, sm: 32 },
+                  height: { xs: 28, sm: 32 },
+                  bgcolor: '#000000',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                }}
+              >
+                {user?.name?.charAt(0) || 'U'}
+              </Avatar>
               <Typography 
                 variant="body2" 
                 sx={{ 
-                  mr: 1,
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  color: 'text.primary',
+                  flex: 1,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                   display: { xs: 'none', sm: 'block' }
                 }}
               >
-                {user.name}
+                {user?.name || 'User'}
               </Typography>
-            )}
-            <IconButton color="inherit" onClick={handleMenuOpen}>
-              {user?.profilePicture ? (
-                <Avatar 
-                  src={`http://localhost:5000${user.profilePicture}`}
-                  alt={user.name}
-                  sx={{ width: 32, height: 32 }}
-                />
-              ) : (
-                <AccountCircle />
-              )}
-            </IconButton>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: 'text.secondary',
+                  transition: 'transform 0.2s',
+                  transform: Boolean(anchorEl) ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Box>
+            </Box>
           </Box>
 
           <Menu
@@ -188,83 +417,42 @@ const CandidateLayout = () => {
               Logout
             </MenuItem>
           </Menu>
-
-          {/* Logout Confirmation Dialog */}
-          <Dialog
-            open={logoutDialogOpen}
-            onClose={handleLogoutCancel}
-            aria-labelledby="logout-dialog-title"
-            aria-describedby="logout-dialog-description"
-          >
-            <DialogTitle id="logout-dialog-title">
-              Confirm Logout
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id="logout-dialog-description">
-                Are you sure you want to logout? You will need to sign in again to access your account.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleLogoutCancel} color="primary">
-                Cancel
-              </Button>
-              <Button onClick={handleLogoutConfirm} color="error" variant="contained" autoFocus>
-                Logout
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar */}
-      <Drawer
-        variant={isMobile ? 'temporary' : 'persistent'}
-        open={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        ModalProps={{
-          keepMounted: true, // Better mobile performance
-        }}
-        sx={{
-          width: isSidebarOpen ? drawerWidth : 0,
-          flexShrink: 0,
-          transition: 'width 0.3s ease-in-out',
-          [`& .MuiDrawer-paper`]: { 
-            width: drawerWidth, 
-            boxSizing: 'border-box',
-            transition: 'transform 0.3s ease-in-out',
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            {menuItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton onClick={() => handleNavigation(item.path)}>
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
         </Box>
-      </Drawer>
 
-      {/* Main Content Area */}
-      <Box 
-        component="main" 
-        sx={{ 
-          flexGrow: 1, 
-          p: { xs: 2, sm: 3 },
-          marginTop: '64px',
-          transition: 'all 0.3s ease-in-out',
-          minWidth: 0,
-          overflowX: 'hidden',
-          width: '100%',
-        }}
-      >
-        <Outlet />
+        {/* Main Content Area */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: { xs: 2, sm: 3 },
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+            overflowX: 'hidden',
+          }}
+        >
+          <Outlet />
+        </Box>
       </Box>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={logoutDialogOpen}
+        onClose={handleLogoutCancel}
+        PaperProps={{ sx: { borderRadius: '12px', minWidth: '400px' } }}
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>Confirm Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to logout? You will need to login again to access your account.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={handleLogoutCancel} sx={{ color: '#6b7280' }}>Cancel</Button>
+          <Button onClick={handleLogoutConfirm} variant="contained" sx={{ bgcolor: '#ef4444', '&:hover': { bgcolor: '#dc2626' } }}>
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

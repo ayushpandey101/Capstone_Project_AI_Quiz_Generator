@@ -60,6 +60,14 @@ const classSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  messagingEnabled: {
+    type: Boolean,
+    default: true,
+  },
+  allowStudentMessages: {
+    type: Boolean,
+    default: true,
+  },
   semester: {
     type: String,
     default: '',
@@ -71,6 +79,13 @@ const classSchema = new mongoose.Schema({
 }, { 
   timestamps: true // Adds `createdAt` and `updatedAt` fields
 });
+
+// Create indexes for performance
+// Note: inviteCode already has unique index from schema
+classSchema.index({ adminId: 1 });
+classSchema.index({ isActive: 1 });
+classSchema.index({ adminId: 1, isActive: 1 }); // Compound index for active classes
+classSchema.index({ students: 1 }); // Index for student lookups
 
 const Class = mongoose.model('Class', classSchema);
 

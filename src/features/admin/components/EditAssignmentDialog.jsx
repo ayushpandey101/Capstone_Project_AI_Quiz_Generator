@@ -100,13 +100,8 @@ const EditAssignmentDialog = ({ open, onClose, assignment, onSuccess }) => {
 
       // Check if due date is in the past
       if (dueDate < new Date()) {
-        const confirmPast = window.confirm(
-          'The due date is in the past. This assignment will be closed. Continue?'
-        );
-        if (!confirmPast) {
-          setIsSubmitting(false);
-          return;
-        }
+
+        // Continue anyway
       }
 
       // Get token from localStorage

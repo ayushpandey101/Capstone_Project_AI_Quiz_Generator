@@ -55,20 +55,34 @@ const ResultsPage = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       {/* Page Header */}
-      <Typography variant="h4" gutterBottom>
+      <Typography 
+        variant="h4" 
+        gutterBottom
+        sx={{ 
+          fontSize: { xs: '1.5rem', sm: '2rem' },
+          fontWeight: 'bold'
+        }}
+      >
         Class Results
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography 
+        variant="body1" 
+        color="text.secondary" 
+        sx={{ 
+          mb: { xs: 2, sm: 3 },
+          fontSize: { xs: '0.875rem', sm: '1rem' }
+        }}
+      >
         Search for a class to view, edit, and download student results
       </Typography>
 
-      <Divider sx={{ mb: 3 }} />
+      <Divider sx={{ mb: { xs: 2, sm: 3 } }} />
 
       {/* Class Search/Selection */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
+      <Card sx={{ mb: { xs: 2, sm: 3 } }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
               <CircularProgress size={24} />
@@ -90,16 +104,19 @@ const ResultsPage = () => {
                   helperText="Select a class to view its results"
                 />
               )}
-              renderOption={(props, option) => (
-                <li {...props}>
-                  <Box>
-                    <Typography variant="body1">{option.title}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {option.courseCode} • {option.students?.length || 0} students
-                    </Typography>
-                  </Box>
-                </li>
-              )}
+              renderOption={(props, option) => {
+                const { key, ...otherProps } = props;
+                return (
+                  <li key={key} {...otherProps}>
+                    <Box>
+                      <Typography variant="body1">{option.title}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option.courseCode} • {option.students?.length || 0} students
+                      </Typography>
+                    </Box>
+                  </li>
+                );
+              }}
               isOptionEqualToValue={(option, value) => option._id === value._id}
               noOptionsText="No classes found"
               fullWidth

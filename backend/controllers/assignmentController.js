@@ -1176,4 +1176,58 @@ export const getClassResults = async (req, res) => {
   }
 };
 
+/**
+ * Delete a specific submission
+ * DELETE /api/assignments/:assignmentId/submissions/:submissionId
+ * Allows admin to remove a candidate's submission so they can retake the exam
+ */
+export const deleteSubmission = async (req, res) => {
+  try {
+    const { assignmentId, submissionId } = req.params;
+    const adminId = req.user?.id || req.user?._id;
+
+    // Find the assignment and verify admin ownership
+    const assignment = await Assignment.findOne({ _id: assignmentId, adminId });
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Assignment not found or you are not authorized',
+      });
+    }
+
+    // Find the submission in the assignment
+    const submissionIndex = assignment.submissions.findIndex(
+      sub => sub._id.toString() === submissionId
+    );
+
+    if (submissionIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Submission not found',
+      });
+    }
+
+    // Remove the submission
+    const deletedSubmission = assignment.submissions[submissionIndex];
+    assignment.submissions.splice(submissionIndex, 1);
+    await assignment.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Submission deleted successfully. Candidate can now retake the exam.',
+      data: {
+        candidateId: deletedSubmission.candidateId,
+        deletedAt: new Date(),
+      },
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message,
+    });
+  }
+};
+
 

@@ -8,6 +8,7 @@ import {
   getAssignmentSubmissions,
   getSubmissionDetails,
   getClassResults,
+  deleteSubmission,
 } from '../controllers/assignmentController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -63,5 +64,11 @@ router.put('/:id', updateAssignment);
  * Delete an assignment
  */
 router.delete('/:id', deleteAssignment);
+
+/**
+ * DELETE /api/assignments/:assignmentId/submissions/:submissionId
+ * Delete a specific submission (allow candidate to retake)
+ */
+router.delete('/:assignmentId/submissions/:submissionId', deleteSubmission);
 
 export default router;

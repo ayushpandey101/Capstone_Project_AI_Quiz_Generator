@@ -1,64 +1,78 @@
 // Admin Layout Component
-import React from 'react';
-import { Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Drawer, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import Navbar from '../../../shared/components/Navbar';
 import Sidebar from '../../../shared/components/Sidebar';
+import TopNavbar from '../../../shared/components/TopNavbar';
 
 const AdminLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  // We can use a simple width for the sidebar
   const sidebarWidth = 240;
+  const leftGap = 16;
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Check if mobile on mount and window resize
-  React.useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 900;
-      setIsMobile(mobile);
-      if (mobile) {
-        setIsSidebarOpen(false);
-      }
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f3f4f6' }}>
       
-      {/* 1. The Top Navbar */}
-      <Navbar 
-        sidebarWidth={sidebarWidth} 
-        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        isSidebarOpen={isSidebarOpen}
-      />
-      
-      {/* 2. The Left Sidebar */}
-      <Sidebar 
-        width={sidebarWidth} 
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        isMobile={isMobile}
-      />
-
-      {/* 3. The Main View Zone */}
-      <Box
-        component="main"
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
         sx={{
-          flexGrow: 1,
-          p: { xs: 2, sm: 3 }, // Responsive padding
-          marginTop: '64px', // Standard height of AppBar
-          transition: 'all 0.3s ease-in-out',
-          minWidth: 0, // Prevent overflow
-          overflowX: 'hidden',
-          width: '100%',
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: sidebarWidth,
+            border: 'none',
+          },
         }}
       >
-        <Outlet /> {/* This is where our pages (Dashboard, MyClasses) will appear */}
+        <Sidebar isMobile={true} onClose={handleDrawerToggle} />
+      </Drawer>
+
+      {/* Desktop Static Sidebar */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Sidebar isMobile={false} />
+      </Box>
+
+      {/* Right Side Content with Top Navbar */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          ml: { xs: 0, md: `${sidebarWidth + leftGap}px` },
+          minWidth: 0,
+          width: { xs: '100%', md: `calc(100% - ${sidebarWidth + leftGap}px)` },
+          display: 'flex',
+          flexDirection: 'column',
+          p: { xs: 1, sm: 2 },
+        }}
+      >
+        {/* Top Navbar */}
+        <TopNavbar onMenuClick={handleDrawerToggle} isMobile={isMobile} />
+
+        {/* Main Content Area */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: { xs: 2, sm: 3 },
+            mt: 2,
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+            overflowX: 'hidden',
+          }}
+        >
+          <Outlet />
+        </Box>
       </Box>
 
     </Box>

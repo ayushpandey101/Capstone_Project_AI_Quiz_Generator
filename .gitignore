@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 **/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Environment variables (SENSITIVE!)
 .env
@@ -9,6 +12,7 @@ node_modules/
 .env.development
 .env.production
 .env.test
+*.env
 !.env.example
 
 # Logs
@@ -27,7 +31,7 @@ build/
 out/
 *.local
 
-# Markdown documentation files
+# Markdown documentation files (except main README)
 *.md
 !README.md
 
@@ -41,6 +45,10 @@ out/
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*.swn
+*~
 
 # Operating System Files
 .DS_Store?
@@ -58,8 +66,21 @@ temp/
 *.bak
 *.cache
 
-# Uploaded files
+# Uploaded files (user content)
 uploads/*
 !uploads/.gitkeep
 public/uploads/avatars/*
 !public/uploads/avatars/.gitkeep
+
+# Test files
+test-*.html
+*.test.html
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Sensitive configuration
+config/production.js
+config/secrets.js

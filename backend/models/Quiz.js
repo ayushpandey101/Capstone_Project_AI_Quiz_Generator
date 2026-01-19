@@ -65,6 +65,12 @@ const quizSchema = new Schema({
   questions: [questionSchema],
 }, { timestamps: true });
 
+// Create indexes for performance
+quizSchema.index({ adminId: 1 });
+quizSchema.index({ title: 1 });
+quizSchema.index({ subgroup: 1 });
+quizSchema.index({ adminId: 1, createdAt: -1 }); // Compound index for fetching admin's quizzes
+
 const Quiz = mongoose.model('Quiz', quizSchema);
 
 export default Quiz;

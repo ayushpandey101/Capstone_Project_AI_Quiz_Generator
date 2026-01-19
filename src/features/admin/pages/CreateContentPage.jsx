@@ -217,10 +217,37 @@ const CreateContentPage = () => {
 
       {/* "Generate with AI" Tab Content */}
       <TabPanel value={currentTab} index={0}>
-        <Paper sx={{ p: 3, background: '#f9f9f9' }}>
-          <Typography variant="h6" gutterBottom>
-            AI Content Generator
-          </Typography>
+        <Paper 
+          sx={{ 
+            p: 3, 
+            bgcolor: '#ffffff',
+            border: '2px solid #000000',
+            borderRadius: 1,
+            boxShadow: 'none',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+            <Box sx={{ 
+              width: 40, 
+              height: 40, 
+              bgcolor: '#000000', 
+              borderRadius: 1, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              fontSize: '20px'
+            }}>
+              ✨
+            </Box>
+            <Box>
+              <Typography variant="h6" fontWeight="bold" sx={{ color: '#000000' }}>
+                AI Quiz Generator
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                Generate quizzes with AI or create them manually, then assign to students
+              </Typography>
+            </Box>
+          </Box>
           
           {/* Gemini-like Prompt Box */}
           <TextField
@@ -228,23 +255,41 @@ const CreateContentPage = () => {
             multiline
             rows={4}
             variant="outlined"
-            placeholder="e.g., 'Create a 10-question multiple-choice quiz on the Roman Republic.'"
+            placeholder="Topic or Prompt\n\ne.g., 'Create a 10-question multiple-choice quiz on the Roman Republic.'"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            sx={{ mb: 2, background: '#fff' }}
+            sx={{ 
+              mb: 3, 
+              '& .MuiOutlinedInput-root': {
+                bgcolor: '#f9fafb',
+                borderRadius: 1,
+                fontSize: '0.95rem',
+                '& fieldset': {
+                  borderColor: '#e5e7eb',
+                  borderWidth: '2px'
+                },
+                '&:hover fieldset': {
+                  borderColor: '#000000',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#000000',
+                  borderWidth: '2px'
+                },
+              },
+            }}
           />
           
           {/* Form controls at the bottom */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             
             {/* Question Types Selection */}
-            <Paper sx={{ p: 2, background: '#fff' }}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                Select Question Types (choose one or more):
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body2" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+                Question Types:
               </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
                 <Chip
-                  label="Multiple Choice (MCQ)"
+                  label="Multiple Choice"
                   onClick={() => {
                     setSelectedQuizTypes(prev => 
                       prev.includes('mcq') 
@@ -252,9 +297,18 @@ const CreateContentPage = () => {
                         : [...prev, 'mcq']
                     );
                   }}
-                  color={selectedQuizTypes.includes('mcq') ? 'primary' : 'default'}
-                  variant={selectedQuizTypes.includes('mcq') ? 'filled' : 'outlined'}
-                  sx={{ fontWeight: selectedQuizTypes.includes('mcq') ? 600 : 400 }}
+                  sx={{ 
+                    bgcolor: selectedQuizTypes.includes('mcq') ? '#000000' : 'transparent',
+                    color: selectedQuizTypes.includes('mcq') ? '#ffffff' : '#000000',
+                    border: '2px solid #000000',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    height: 36,
+                    borderRadius: '6px',
+                    '&:hover': {
+                      bgcolor: selectedQuizTypes.includes('mcq') ? '#1f2937' : 'rgba(0,0,0,0.04)',
+                    }
+                  }}
                 />
                 <Chip
                   label="True/False"
@@ -265,9 +319,18 @@ const CreateContentPage = () => {
                         : [...prev, 'true_false']
                     );
                   }}
-                  color={selectedQuizTypes.includes('true_false') ? 'primary' : 'default'}
-                  variant={selectedQuizTypes.includes('true_false') ? 'filled' : 'outlined'}
-                  sx={{ fontWeight: selectedQuizTypes.includes('true_false') ? 600 : 400 }}
+                  sx={{ 
+                    bgcolor: selectedQuizTypes.includes('true_false') ? '#000000' : 'transparent',
+                    color: selectedQuizTypes.includes('true_false') ? '#ffffff' : '#000000',
+                    border: '2px solid #000000',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    height: 36,
+                    borderRadius: '6px',
+                    '&:hover': {
+                      bgcolor: selectedQuizTypes.includes('true_false') ? '#1f2937' : 'rgba(0,0,0,0.04)',
+                    }
+                  }}
                 />
                 <Chip
                   label="Short Answer"
@@ -278,26 +341,47 @@ const CreateContentPage = () => {
                         : [...prev, 'short_answer']
                     );
                   }}
-                  color={selectedQuizTypes.includes('short_answer') ? 'primary' : 'default'}
-                  variant={selectedQuizTypes.includes('short_answer') ? 'filled' : 'outlined'}
-                  sx={{ fontWeight: selectedQuizTypes.includes('short_answer') ? 600 : 400 }}
+                  sx={{ 
+                    bgcolor: selectedQuizTypes.includes('short_answer') ? '#000000' : 'transparent',
+                    color: selectedQuizTypes.includes('short_answer') ? '#ffffff' : '#000000',
+                    border: '2px solid #000000',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    height: 36,
+                    borderRadius: '6px',
+                    '&:hover': {
+                      bgcolor: selectedQuizTypes.includes('short_answer') ? '#1f2937' : 'rgba(0,0,0,0.04)',
+                    }
+                  }}
                 />
               </Stack>
-              {selectedQuizTypes.length === 0 && (
-                <Alert severity="warning" sx={{ mt: 1 }}>
-                  Please select at least one question type
-                </Alert>
+              {selectedQuizTypes.length > 0 && (
+                <Typography variant="caption" sx={{ mt: 1.5, display: 'block', color: 'text.secondary' }}>
+                  ✓ {selectedQuizTypes.length} type{selectedQuizTypes.length > 1 ? 's' : ''} selected
+                </Typography>
               )}
-              {selectedQuizTypes.length > 1 && (
-                <Alert severity="info" sx={{ mt: 1 }}>
-                  AI will generate a mix of {selectedQuizTypes.map(t => 
-                    t === 'mcq' ? 'MCQ' : 
-                    t === 'true_false' ? 'True/False' : 
-                    'Short Answer'
-                  ).join(', ')} questions
-                </Alert>
-              )}
-            </Paper>
+            </Box>
+            
+            {/* Tip Box */}
+            <Box sx={{ 
+              p: 2, 
+              bgcolor: '#f3f4f6', 
+              borderRadius: 1, 
+              border: '1px solid #d1d5db',
+              display: 'flex',
+              gap: 1.5,
+              mb: 3
+            }}>
+              <Typography sx={{ fontSize: '1.25rem' }}>💡</Typography>
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#374151', mb: 0.5 }}>
+                  Tip:
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                  Be specific with your prompt for better results (1-50 questions).
+                </Typography>
+              </Box>
+            </Box>
             
             {/* Generate Button */}
             <Button 
@@ -305,9 +389,35 @@ const CreateContentPage = () => {
               size="large" 
               onClick={handleGenerate}
               disabled={isLoading || selectedQuizTypes.length === 0}
-              sx={{ alignSelf: 'flex-start' }}
+              sx={{ 
+                alignSelf: 'flex-start',
+                bgcolor: '#000000',
+                color: '#ffffff',
+                fontWeight: 600,
+                px: 4,
+                py: 1.5,
+                borderRadius: '6px',
+                textTransform: 'none',
+                fontSize: '0.95rem',
+                '&:hover': {
+                  bgcolor: '#1f2937',
+                },
+                '&:disabled': {
+                  bgcolor: '#e5e7eb',
+                  color: '#9ca3af'
+                }
+              }}
             >
-              {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Generate Quiz'}
+              {isLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CircularProgress size={20} sx={{ color: '#ffffff' }} />
+                  Generating...
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span>✨</span> Generate Quiz
+                </Box>
+              )}
             </Button>
           </Box>
         </Paper>

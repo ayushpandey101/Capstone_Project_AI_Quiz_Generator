@@ -1,5 +1,5 @@
 // src/components/AssignmentsTab.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -17,28 +17,30 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  DialogContentText,
   Alert,
   IconButton,
   Tooltip,
-} from '@mui/material';
-import { useAuth } from '../../auth/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import EditIcon from '@mui/icons-material/Edit';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import EditAssignmentDialog from './EditAssignmentDialog';
-import Loader from '../../../components/Loader';
-import DeleteIcon from '@mui/icons-material/Delete';
+  Snackbar,
+} from "@mui/material";
+import { useAuth } from "../../auth/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import EditIcon from "@mui/icons-material/Edit";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import EditAssignmentDialog from "./EditAssignmentDialog";
+import Loader from "../../../components/Loader";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const AssignmentsTab = ({ classId }) => {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [assignments, setAssignments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   // Submissions dialog state
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [submissions, setSubmissions] = useState([]);
@@ -54,20 +56,30 @@ const AssignmentsTab = ({ classId }) => {
   const [assignmentToDelete, setAssignmentToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Delete submission state
+  const [deleteSubmissionDialogOpen, setDeleteSubmissionDialogOpen] =
+    useState(false);
+  const [submissionToDelete, setSubmissionToDelete] = useState(null);
+  const [isDeletingSubmission, setIsDeletingSubmission] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
   // Fetch assignments for this class
   const fetchAssignments = async () => {
     setIsLoading(true);
-    setError('');
+    setError("");
     try {
-      const response = await fetch(`http://localhost:5000/api/assignments/class/${classId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `http://localhost:5000/api/assignments/class/${classId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch assignments');
+        throw new Error("Failed to fetch assignments");
       }
 
       const result = await response.json();
@@ -89,22 +101,26 @@ const AssignmentsTab = ({ classId }) => {
   const fetchSubmissions = async (assignmentId) => {
     setIsLoadingSubmissions(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/assignments/${assignmentId}/submissions`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `http://localhost:5000/api/assignments/${assignmentId}/submissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch submissions');
+        throw new Error("Failed to fetch submissions");
       }
 
       const result = await response.json();
       setSubmissions(result.data.submissions || []);
-      setSelectedAssignment(result.data);
+      // Store the complete assignment data including _id
+      setSelectedAssignment({ ...result.data, _id: assignmentId });
     } catch (error) {
-      alert('Failed to load submissions: ' + error.message);
+
     } finally {
       setIsLoadingSubmissions(false);
     }
@@ -141,16 +157,19 @@ const AssignmentsTab = ({ classId }) => {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/assignments/${assignmentToDelete._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/assignments/${assignmentToDelete._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to delete assignment');
+        throw new Error("Failed to delete assignment");
       }
 
       // Refresh assignments list
@@ -158,7 +177,7 @@ const AssignmentsTab = ({ classId }) => {
       setDeleteDialogOpen(false);
       setAssignmentToDelete(null);
     } catch (err) {
-      alert('Error deleting assignment: ' + err.message);
+
     } finally {
       setIsDeleting(false);
     }
@@ -172,10 +191,10 @@ const AssignmentsTab = ({ classId }) => {
 
   // Format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -186,12 +205,89 @@ const AssignmentsTab = ({ classId }) => {
     return (total / submissions.length).toFixed(2);
   };
 
+  // Handle delete submission click
+  const handleDeleteSubmissionClick = (e, submission) => {
+    e.stopPropagation();
+    setSubmissionToDelete(submission);
+    setDeleteSubmissionDialogOpen(true);
+  };
+
+  // Handle delete submission confirm
+  const handleDeleteSubmissionConfirm = async () => {
+    if (!submissionToDelete || !selectedAssignment) return;
+
+    setIsDeletingSubmission(true);
+    try {
+
+      const response = await fetch(
+        `http://localhost:5000/api/assignments/${selectedAssignment._id}/submissions/${submissionToDelete._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete submission");
+      }
+
+      // Remove the deleted submission from local state
+      setSubmissions((prev) =>
+        prev.filter((sub) => sub._id !== submissionToDelete._id)
+      );
+
+      // Refresh assignments to update submission count
+      fetchAssignments();
+
+      setSnackbar({
+        open: true,
+        message: 'Submission deleted successfully. Candidate can now retake the exam.',
+        severity: 'success'
+      });
+
+      setDeleteSubmissionDialogOpen(false);
+      setSubmissionToDelete(null);
+    } catch (err) {
+
+      setSnackbar({
+        open: true,
+        message: err.message || 'Failed to delete submission',
+        severity: 'error'
+      });
+    } finally {
+      setIsDeletingSubmission(false);
+    }
+  };
+
+  const handleDeleteSubmissionCancel = () => {
+    setDeleteSubmissionDialogOpen(false);
+    setSubmissionToDelete(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   // Sort assignments by date of posting (createdAt) descending
-  const sortedAssignments = [...assignments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const sortedAssignments = [...assignments].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "300px",
+        }}
+      >
         <Loader />
       </Box>
     );
@@ -208,8 +304,10 @@ const AssignmentsTab = ({ classId }) => {
   if (assignments.length === 0) {
     return (
       <Box sx={{ p: 2 }}>
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <AssessmentIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
+        <Paper sx={{ p: 4, textAlign: "center" }}>
+          <AssessmentIcon
+            sx={{ fontSize: 60, color: "text.secondary", mb: 2 }}
+          />
           <Typography variant="h6" color="text.secondary">
             No assignments yet
           </Typography>
@@ -227,39 +325,60 @@ const AssignmentsTab = ({ classId }) => {
         Assignments
       </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+        <Table sx={{ minWidth: { xs: 800, md: "auto" } }}>
           <TableHead>
             <TableRow>
-              <TableCell align="left"><strong>Quiz Title</strong></TableCell>
-              <TableCell align="center"><strong>Subgroup</strong></TableCell>
-              <TableCell align="center"><strong>Weightage</strong></TableCell>
-              <TableCell align="center"><strong>Due Date</strong></TableCell>
-              <TableCell align="center"><strong>Time Limit</strong></TableCell>
-              <TableCell align="center"><strong>Submissions</strong></TableCell>
-              <TableCell align="center"><strong>Avg Score</strong></TableCell>
-              <TableCell align="center"><strong>Actions</strong></TableCell>
+              <TableCell align="left">
+                <strong>Quiz Title</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Subgroup</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Weightage</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Due Date</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Time Limit</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Submissions</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Avg Score</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Actions</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {sortedAssignments.map((assignment) => {
               const submissionCount = assignment.submissions?.length || 0;
-              const avgScore = submissionCount > 0 
-                ? calculateAverageScore(assignment.submissions) 
-                : '-';
+              const avgScore =
+                submissionCount > 0
+                  ? calculateAverageScore(assignment.submissions)
+                  : "-";
               const isOverdue = new Date(assignment.dueDate) < new Date();
 
               return (
                 <TableRow key={assignment._id} hover>
                   <TableCell align="left">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Typography variant="body1">
-                        {assignment.quizId?.title || 'Unknown Quiz'}
+                        {assignment.quizId?.title || "Unknown Quiz"}
                       </Typography>
                       <Tooltip title="Edit quiz in Content Library">
                         <IconButton
                           size="small"
-                          onClick={() => navigate(`/admin/content/edit/${assignment.quizId?._id}`)}
+                          onClick={() =>
+                            navigate(
+                              `/admin/content/edit/${assignment.quizId?._id}`
+                            )
+                          }
                         >
                           <EditNoteIcon fontSize="small" />
                         </IconButton>
@@ -267,41 +386,51 @@ const AssignmentsTab = ({ classId }) => {
                     </Box>
                   </TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
                       {assignment.subgroup ? (
                         <Box
                           sx={{
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 1,
-                            background: '#222',
-                            color: '#fff',
-                            fontWeight: 'bold',
-                            fontSize: '0.85rem',
-                            fontFamily: 'inherit',
-                            border: '1px solid #222',
-                            minWidth: assignment.subgroup.includes(',') ? 120 : 70,
-                            textAlign: 'center',
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 0.5,
+                            background: "#222",
+                            color: "#fff",
+                            fontWeight: 600,
+                            fontSize: "0.75rem",
+                            fontFamily: "inherit",
+                            border: "1px solid #222",
+                            minWidth: assignment.subgroup.includes(",")
+                              ? 80
+                              : 50,
+                            textAlign: "center",
                           }}
                         >
-                          {assignment.subgroup.includes(',') 
-                            ? assignment.subgroup.split(',').map(b => b.trim()).join(', ')
-                            : assignment.subgroup
-                          }
+                          {assignment.subgroup.includes(",")
+                            ? assignment.subgroup
+                                .split(",")
+                                .map((b) => b.trim())
+                                .join(", ")
+                            : assignment.subgroup}
                         </Box>
                       ) : (
                         <Box
                           sx={{
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 1,
-                            background: '#4CAF50',
-                            color: '#fff',
-                            fontFamily: 'inherit',
-                            fontWeight: 'bold',
-                            fontSize: '0.85rem',
-                            minWidth: 70,
-                            textAlign: 'center',
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 0.5,
+                            background: "#000000",
+                            color: "#fff",
+                            fontFamily: "inherit",
+                            fontWeight: 600,
+                            fontSize: "0.75rem",
+                            minWidth: 50,
+                            textAlign: "center",
                           }}
                         >
                           ALL
@@ -312,60 +441,107 @@ const AssignmentsTab = ({ classId }) => {
                   <TableCell align="center">
                     <Chip
                       label={
-                        assignment.weightageType === 'percentage'
+                        assignment.weightageType === "percentage"
                           ? `${assignment.weightage || 0}%`
                           : `${assignment.weightage || 0} marks`
                       }
-                      color={assignment.weightageType === 'percentage' ? 'secondary' : 'success'}
                       size="small"
-                      sx={{ fontWeight: 600, minWidth: 80 }}
+                      sx={{
+                        fontWeight: 600,
+                        minWidth: 60,
+                        height: 24,
+                        fontSize: "0.75rem",
+                        bgcolor: "#000000",
+                        color: "#ffffff",
+                        "& .MuiChip-label": { px: 1 },
+                      }}
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
                       {formatDate(assignment.dueDate)}
                       {isOverdue && (
                         <Chip label="Overdue" color="error" size="small" />
                       )}
                     </Box>
                   </TableCell>
-                  <TableCell align="center">{assignment.timeLimit} mins</TableCell>
+                  <TableCell align="center">
+                    {assignment.timeLimit} mins
+                  </TableCell>
                   <TableCell align="center">
                     <Chip
                       label={submissionCount}
-                      color={submissionCount > 0 ? 'success' : 'default'}
+                      color={submissionCount > 0 ? "success" : "default"}
                       size="small"
+                      sx={{ height: 24, fontSize: "0.75rem", minWidth: 32 }}
                     />
                   </TableCell>
                   <TableCell align="center">
-                    {avgScore !== '-' ? `${avgScore}%` : '-'}
+                    {avgScore !== "-" ? `${avgScore}%` : "-"}
                   </TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 0.25,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexWrap: "nowrap",
+                      }}
+                    >
                       <Tooltip title="Edit assignment">
                         <IconButton
-                          color="primary"
                           size="small"
                           onClick={() => handleEditClick(assignment)}
+                          sx={{ p: 0.5 }}
                         >
-                          <EditIcon fontSize="small" />
+                          <EditIcon sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Tooltip>
                       <Button
                         variant="outlined"
                         size="small"
-                        startIcon={<VisibilityIcon />}
+                        startIcon={<VisibilityIcon sx={{ fontSize: 16 }} />}
                         onClick={() => handleViewSubmissions(assignment)}
                         disabled={submissionCount === 0}
+                        sx={{
+                          minWidth: "auto",
+                          px: 0.75,
+                          py: 0.25,
+                          fontSize: "0.75rem",
+                          lineHeight: 1.5,
+                          "& .MuiButton-startIcon": { mr: 0.5 },
+                        }}
                       >
                         Quick View
                       </Button>
                       <Button
                         variant="contained"
                         size="small"
-                        startIcon={<OpenInNewIcon />}
-                        onClick={() => navigate(`/admin/assignment/${assignment._id}/submissions`)}
+                        startIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
+                        onClick={() =>
+                          navigate(
+                            `/admin/assignment/${assignment._id}/submissions`
+                          )
+                        }
                         disabled={submissionCount === 0}
+                        sx={{
+                          minWidth: "auto",
+                          px: 0.75,
+                          py: 0.25,
+                          fontSize: "0.75rem",
+                          lineHeight: 1.5,
+                          bgcolor: "#000000",
+                          "&:hover": { bgcolor: "#1f2937" },
+                          "& .MuiButton-startIcon": { mr: 0.5 },
+                        }}
                       >
                         Full View
                       </Button>
@@ -374,9 +550,9 @@ const AssignmentsTab = ({ classId }) => {
                           color="error"
                           size="small"
                           onClick={() => handleDeleteClick(assignment)}
-                          sx={{ ml: 1 }}
+                          sx={{ p: 0.5 }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          <DeleteIcon sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -389,8 +565,8 @@ const AssignmentsTab = ({ classId }) => {
       </TableContainer>
 
       {/* Submissions Dialog */}
-      <Dialog 
-        open={isSubmissionsDialogOpen} 
+      <Dialog
+        open={isSubmissionsDialogOpen}
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
@@ -407,46 +583,73 @@ const AssignmentsTab = ({ classId }) => {
         </DialogTitle>
         <DialogContent>
           {isLoadingSubmissions ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4, minHeight: '200px' }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                p: 4,
+                minHeight: "200px",
+              }}
+            >
               <Loader />
             </Box>
           ) : submissions.length === 0 ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
+            <Box sx={{ p: 4, textAlign: "center" }}>
               <Typography variant="body1" color="text.secondary">
                 No submissions yet
               </Typography>
             </Box>
           ) : (
             <TableContainer>
-              <Table>
+              <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell><strong>Student Name</strong></TableCell>
-                    <TableCell><strong>Email</strong></TableCell>
-                    <TableCell><strong>Score</strong></TableCell>
-                    <TableCell><strong>Status</strong></TableCell>
-                    <TableCell><strong>Submitted At</strong></TableCell>
+                    <TableCell>
+                      <strong>Student Name</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Email</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Score</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Status</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>Submitted At</strong>
+                    </TableCell>
+                    <TableCell align="center" sx={{ width: 80 }}>
+                      <strong>Actions</strong>
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {submissions.map((submission, index) => (
                     <TableRow key={index}>
-                      <TableCell>{submission.candidateId?.name || 'Unknown'}</TableCell>
-                      <TableCell>{submission.candidateId?.email || '-'}</TableCell>
                       <TableCell>
-                        <Chip 
+                        {submission.candidateId?.name || "Unknown"}
+                      </TableCell>
+                      <TableCell>
+                        {submission.candidateId?.email || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
                           label={`${submission.score.toFixed(2)}%`}
-                          color={submission.score >= 70 ? 'success' : submission.score >= 50 ? 'warning' : 'error'}
+                          color={
+                            submission.score >= 70
+                              ? "success"
+                              : submission.score >= 50
+                              ? "warning"
+                              : "error"
+                          }
                           size="small"
                         />
                       </TableCell>
                       <TableCell>
                         {submission.isLateSubmission ? (
-                          <Chip
-                            label="Late"
-                            color="warning"
-                            size="small"
-                          />
+                          <Chip label="Late" color="warning" size="small" />
                         ) : (
                           <Chip
                             label="On Time"
@@ -457,13 +660,30 @@ const AssignmentsTab = ({ classId }) => {
                         )}
                       </TableCell>
                       <TableCell>
-                        {new Date(submission.submittedAt).toLocaleString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {new Date(submission.submittedAt).toLocaleString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="Delete submission (allow retake)">
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={(e) =>
+                              handleDeleteSubmissionClick(e, submission)
+                            }
+                            sx={{ p: 0.5 }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -471,9 +691,16 @@ const AssignmentsTab = ({ classId }) => {
               </Table>
             </TableContainer>
           )}
-          
+
           {selectedAssignment && submissions.length > 0 && (
-            <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+            <Box
+              sx={{
+                mt: 3,
+                p: 2,
+                bgcolor: "background.default",
+                borderRadius: 1,
+              }}
+            >
               <Typography variant="body2" color="text.secondary">
                 <strong>Statistics:</strong>
               </Typography>
@@ -484,10 +711,12 @@ const AssignmentsTab = ({ classId }) => {
                 Average Score: {calculateAverageScore(submissions)}%
               </Typography>
               <Typography variant="body2">
-                Highest Score: {Math.max(...submissions.map(s => s.score)).toFixed(2)}%
+                Highest Score:{" "}
+                {Math.max(...submissions.map((s) => s.score)).toFixed(2)}%
               </Typography>
               <Typography variant="body2">
-                Lowest Score: {Math.min(...submissions.map(s => s.score)).toFixed(2)}%
+                Lowest Score:{" "}
+                {Math.min(...submissions.map((s) => s.score)).toFixed(2)}%
               </Typography>
             </Box>
           )}
@@ -512,7 +741,7 @@ const AssignmentsTab = ({ classId }) => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ color: 'error.main' }}>
+        <DialogTitle sx={{ color: "error.main" }}>
           Delete Assignment
         </DialogTitle>
         <DialogContent>
@@ -522,10 +751,12 @@ const AssignmentsTab = ({ classId }) => {
             </Typography>
           </Alert>
           <Typography variant="body1">
-            Are you sure you want to delete the assignment for "{assignmentToDelete?.quizId?.title}"?
+            Are you sure you want to delete the assignment for "
+            {assignmentToDelete?.quizId?.title}"?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            This will permanently remove the assignment and all associated submissions.
+            This will permanently remove the assignment and all associated
+            submissions.
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -542,13 +773,45 @@ const AssignmentsTab = ({ classId }) => {
             disabled={isDeleting}
             startIcon={isDeleting ? <CircularProgress size={16} /> : null}
           >
-            {isDeleting ? 'Deleting...' : 'Delete Assignment'}
+            {isDeleting ? "Deleting..." : "Delete Assignment"}
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete Submission Confirmation Dialog */}
+      <Dialog open={deleteSubmissionDialogOpen} onClose={handleDeleteSubmissionCancel}>
+        <DialogTitle>Delete Submission?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the submission for{' '}
+            <strong>{submissionToDelete?.candidateId?.name}</strong>?
+            <br /><br />
+            This will allow the candidate to retake the exam. This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteSubmissionCancel} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteSubmissionConfirm} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
 
 export default AssignmentsTab;
-

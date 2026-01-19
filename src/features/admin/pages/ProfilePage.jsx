@@ -62,7 +62,10 @@ const AdminProfilePage = () => {
       });
       // Set avatar preview if user has one
       if (user.profilePicture) {
-        setAvatarPreview(`http://localhost:5000${user.profilePicture}`);
+        const avatarUrl = user.profilePicture.startsWith('http') 
+          ? user.profilePicture 
+          : `http://localhost:5000${user.profilePicture}`;
+        setAvatarPreview(avatarUrl);
       }
     }
   }, [user]);
@@ -138,7 +141,10 @@ const AdminProfilePage = () => {
           severity: 'error',
         });
         // Reset preview on error
-        setAvatarPreview(user?.profilePicture ? `http://localhost:5000${user.profilePicture}` : null);
+        const resetUrl = user?.profilePicture 
+          ? (user.profilePicture.startsWith('http') ? user.profilePicture : `http://localhost:5000${user.profilePicture}`)
+          : null;
+        setAvatarPreview(resetUrl);
       }
     }
   };

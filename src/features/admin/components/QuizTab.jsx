@@ -211,13 +211,25 @@ const QuizTab = ({ classId }) => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
+    <Box sx={{ width: '100%' }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
+      <Box sx={{ mb: { xs: 3, sm: 4 } }}>
+        <Typography 
+          variant="h4" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 700, 
+            color: 'primary.main',
+            fontSize: { xs: '1.5rem', sm: '2rem' }
+          }}
+        >
           Quiz Management
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography 
+          variant="body1" 
+          color="text.secondary"
+          sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+        >
           Generate quizzes with AI or create them manually, then assign to students
         </Typography>
       </Box>
@@ -236,25 +248,29 @@ const QuizTab = ({ classId }) => {
 
       {/* Quiz Generation Section */}
       <Card 
-        elevation={3}
         sx={{ 
-          mb: 4, 
-          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
-          border: '1px solid',
-          borderColor: 'primary.light',
-          borderRadius: 3,
-          overflow: 'hidden',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            boxShadow: 6,
-            borderColor: 'primary.main',
-          }
+          mb: { xs: 3, sm: 4 }, 
+          bgcolor: '#ffffff',
+          border: '2px solid #000000',
+          borderRadius: 1,
+          boxShadow: 'none',
         }}
       >
-        <CardContent sx={{ p: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <AutoAwesomeIcon sx={{ mr: 1.5, color: 'primary.main', fontSize: 28 }} />
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+            <Box sx={{ 
+              width: 40, 
+              height: 40, 
+              bgcolor: '#000000', 
+              borderRadius: 1, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              fontSize: '20px'
+            }}>
+              ✨
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#000000' }}>
               AI Quiz Generator
             </Typography>
           </Box>
@@ -280,10 +296,10 @@ const QuizTab = ({ classId }) => {
             {/* Question Types Selection with Chips */}
             <Grid item xs={12}>
               <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
                   Question Types:
                 </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 0.5 }}>
+                <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ mb: 0.5 }}>
                   <Chip
                     label="Multiple Choice"
                     onClick={() => {
@@ -295,13 +311,18 @@ const QuizTab = ({ classId }) => {
                         );
                       }
                     }}
-                    color={selectedQuizTypes.includes('mcq') ? 'primary' : 'default'}
-                    variant={selectedQuizTypes.includes('mcq') ? 'filled' : 'outlined'}
                     disabled={isGenerating}
                     sx={{ 
-                      fontWeight: selectedQuizTypes.includes('mcq') ? 600 : 400,
-                      transition: 'all 0.2s ease',
-                      '&:hover': { transform: 'scale(1.05)' }
+                      bgcolor: selectedQuizTypes.includes('mcq') ? '#000000' : 'transparent',
+                      color: selectedQuizTypes.includes('mcq') ? '#ffffff' : '#000000',
+                      border: '2px solid #000000',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      height: 36,
+                      borderRadius: '6px',
+                      '&:hover': {
+                        bgcolor: selectedQuizTypes.includes('mcq') ? '#1f2937' : 'rgba(0,0,0,0.04)',
+                      }
                     }}
                   />
                   <Chip
@@ -315,13 +336,18 @@ const QuizTab = ({ classId }) => {
                         );
                       }
                     }}
-                    color={selectedQuizTypes.includes('true_false') ? 'primary' : 'default'}
-                    variant={selectedQuizTypes.includes('true_false') ? 'filled' : 'outlined'}
                     disabled={isGenerating}
                     sx={{ 
-                      fontWeight: selectedQuizTypes.includes('true_false') ? 600 : 400,
-                      transition: 'all 0.2s ease',
-                      '&:hover': { transform: 'scale(1.05)' }
+                      bgcolor: selectedQuizTypes.includes('true_false') ? '#000000' : 'transparent',
+                      color: selectedQuizTypes.includes('true_false') ? '#ffffff' : '#000000',
+                      border: '2px solid #000000',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      height: 36,
+                      borderRadius: '6px',
+                      '&:hover': {
+                        bgcolor: selectedQuizTypes.includes('true_false') ? '#1f2937' : 'rgba(0,0,0,0.04)',
+                      }
                     }}
                   />
                   <Chip
@@ -335,23 +361,23 @@ const QuizTab = ({ classId }) => {
                         );
                       }
                     }}
-                    color={selectedQuizTypes.includes('short_answer') ? 'primary' : 'default'}
-                    variant={selectedQuizTypes.includes('short_answer') ? 'filled' : 'outlined'}
                     disabled={isGenerating}
                     sx={{ 
-                      fontWeight: selectedQuizTypes.includes('short_answer') ? 600 : 400,
-                      transition: 'all 0.2s ease',
-                      '&:hover': { transform: 'scale(1.05)' }
+                      bgcolor: selectedQuizTypes.includes('short_answer') ? '#000000' : 'transparent',
+                      color: selectedQuizTypes.includes('short_answer') ? '#ffffff' : '#000000',
+                      border: '2px solid #000000',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      height: 36,
+                      borderRadius: '6px',
+                      '&:hover': {
+                        bgcolor: selectedQuizTypes.includes('short_answer') ? '#1f2937' : 'rgba(0,0,0,0.04)',
+                      }
                     }}
                   />
                 </Stack>
-                {selectedQuizTypes.length === 0 && !isGenerating && (
-                  <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block', fontWeight: 500 }}>
-                    ⚠️ Please select at least one question type
-                  </Typography>
-                )}
                 {selectedQuizTypes.length > 0 && (
-                  <Typography variant="caption" color="success.main" sx={{ mt: 0.5, display: 'block', fontWeight: 500 }}>
+                  <Typography variant="caption" sx={{ mt: 1.5, display: 'block', color: 'text.secondary' }}>
                     ✓ {selectedQuizTypes.length} type{selectedQuizTypes.length > 1 ? 's' : ''} selected
                   </Typography>
                 )}
@@ -394,20 +420,18 @@ const QuizTab = ({ classId }) => {
                 size="large"
                 onClick={handleGenerateQuiz}
                 disabled={isGenerating || !prompt.trim() || selectedQuizTypes.length === 0}
-                startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <AutoAwesomeIcon />}
+                startIcon={isGenerating ? <CircularProgress size={20} sx={{ color: '#ffffff' }} /> : <span>✨</span>}
                 sx={{ 
                   height: '56px', 
                   fontWeight: 600,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  boxShadow: 3,
-                  transition: 'all 0.3s ease',
+                  bgcolor: '#000000',
+                  color: '#ffffff',
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #5568d3 0%, #63408b 100%)',
-                    boxShadow: 6,
-                    transform: 'translateY(-2px)'
+                    bgcolor: '#1f2937',
                   },
                   '&:disabled': {
-                    background: 'rgba(0, 0, 0, 0.12)'
+                    bgcolor: '#e5e7eb',
+                    color: '#9ca3af'
                   }
                 }}
               >
@@ -416,17 +440,30 @@ const QuizTab = ({ classId }) => {
             </Grid>
           </Grid>
 
-          <Alert severity="info" variant="outlined" sx={{ mt: 3, bgcolor: 'info.50', borderRadius: 2 }}>
-            <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <span style={{ fontSize: '1.2rem' }}>💡</span>
-              <strong>Tip:</strong> Be specific with your prompt for better results (1-50 questions).
-            </Typography>
-          </Alert>
+          <Box sx={{ 
+            p: 2, 
+            bgcolor: '#f3f4f6', 
+            borderRadius: 1, 
+            border: '1px solid #d1d5db',
+            display: 'flex',
+            gap: 1.5,
+            mt: 3
+          }}>
+            <Typography sx={{ fontSize: '1.25rem' }}>💡</Typography>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#374151', mb: 0.5 }}>
+                Tip:
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                Be specific with your prompt for better results (1-50 questions).
+              </Typography>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
 
       {/* Action Buttons */}
-      <Box sx={{ mb: 4, display: 'flex', gap: 2 }}>
+      <Box sx={{ mb: { xs: 3, sm: 4 }, display: 'flex', gap: 2 }}>
         <Button
           variant="outlined"
           size="large"
@@ -435,56 +472,38 @@ const QuizTab = ({ classId }) => {
             setSelectedQuiz(null);
             setEditModalOpen(true);
           }}
-          sx={{ fontWeight: 600 }}
+          sx={{ 
+            fontWeight: 600,
+            width: { xs: '100%', sm: 'auto' },
+            fontSize: { xs: '0.875rem', sm: '1rem' }
+          }}
         >
           Create Quiz Manually
         </Button>
       </Box>
 
       {/* Quiz List Header */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+      <Box sx={{ mb: { xs: 2, sm: 3 }, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 600,
+            fontSize: { xs: '1.25rem', sm: '1.5rem' }
+          }}
+        >
           Your Quizzes ({quizzes.length})
         </Typography>
       </Box>
 
       {/* Quiz List */}
-      {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress size={50} />
-        </Box>
-      ) : quizzes.length === 0 ? (
-        <Card 
-          sx={{ 
-            p: 6, 
-            textAlign: 'center',
-            bgcolor: 'background.paper',
-            border: '2px dashed',
-            borderColor: 'divider',
-          }}
-        >
-          <AutoAwesomeIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h6" gutterBottom color="text.secondary">
-            No quizzes yet
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Generate your first quiz using AI or create one manually!
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setSelectedQuiz(null);
-              setEditModalOpen(true);
-            }}
-          >
-            Create Your First Quiz
-          </Button>
-        </Card>
-      ) : (
-        <Grid container spacing={3}>
-          {quizzes.map((quiz) => (
-            <Grid item xs={12} sm={6} md={4} key={quiz._id} sx={{ width: '31.333%' }}>
+      <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+        {isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mt: 4 }}>
+            <CircularProgress size={50} />
+          </Box>
+        ) : quizzes.length > 0 ? (
+          quizzes.map(quiz => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={quiz._id}>
               <Card 
                 elevation={2}
                 sx={{ 
@@ -503,7 +522,21 @@ const QuizTab = ({ classId }) => {
                 }}
               >
                 <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="h5" component="div" gutterBottom>
+                  <Typography 
+                    variant="h5" 
+                    component="div" 
+                    gutterBottom
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                      fontWeight: 600,
+                      minHeight: 60
+                    }}
+                  >
                     {quiz.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -517,16 +550,32 @@ const QuizTab = ({ classId }) => {
                   </Typography>
                 </CardContent>
                 <Divider />
-                <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2, flexWrap: 'nowrap' }}>
+                <CardActions sx={{ 
+                  justifyContent: 'space-between', 
+                  px: 2, 
+                  pb: 2,
+                  flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                  gap: 1
+                }}>
                   <Button
                     size="small"
                     variant="contained"
                     startIcon={<AssignmentIcon />}
                     onClick={() => handleAssignClick(quiz)}
+                    sx={{ 
+                      width: { xs: '100%', sm: 'auto' },
+                      fontSize: { xs: '0.813rem', sm: '0.875rem' }
+                    }}
                   >
                     Assign
                   </Button>
-                  <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 0.5, 
+                    flexShrink: 0,
+                    width: { xs: '100%', sm: 'auto' },
+                    justifyContent: { xs: 'center', sm: 'flex-start' }
+                  }}>
                     <IconButton
                       size="small"
                       color="primary"
@@ -547,9 +596,29 @@ const QuizTab = ({ classId }) => {
                 </CardActions>
               </Card>
             </Grid>
-          ))}
-        </Grid>
-      )}
+          ))
+        ) : (
+          <Box sx={{ width: '100%', textAlign: 'center', mt: 4 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+            <Typography variant="h6" gutterBottom color="text.secondary">
+              No quizzes yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Generate your first quiz using AI or create one manually!
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setSelectedQuiz(null);
+                setEditModalOpen(true);
+              }}
+            >
+              Create Your First Quiz
+            </Button>
+          </Box>
+        )}
+      </Grid>
       {editModalOpen && (
         <EditQuizModal
           open={editModalOpen}

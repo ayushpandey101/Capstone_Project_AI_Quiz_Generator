@@ -281,8 +281,8 @@ function SignUp() {
     // Try immediately
     initGoogleButton();
     
-    // Then retry every 300ms
-    intervalId = setInterval(initGoogleButton, 300);
+    // Then retry every 1 second (increased from 300ms to reduce API spam)
+    intervalId = setInterval(initGoogleButton, 1000);
     
     return () => {
       if (intervalId) {

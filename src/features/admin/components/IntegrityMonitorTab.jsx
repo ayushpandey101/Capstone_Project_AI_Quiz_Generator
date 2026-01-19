@@ -132,20 +132,34 @@ const IntegrityMonitorTab = ({ classId }) => {
   };
 
   const getSuspiciousLevel = (submission) => {
-    // Add proctoring tab switching to tabSwitchCount
-    const proctorTabSwitch = submission.proctoringData?.tabSwitching || 0;
-    const tabSwitches = (submission.tabSwitchCount || 0) + proctorTabSwitch;
-    // Optionally remove escCount
-    // const escCount = submission.escCount || 0;
-    const proctoringViolations = submission.proctoringData?.totalViolations || 0;
-    const totalViolations = tabSwitches + proctoringViolations;
+    // Calculate all proctoring violations
+    const proctoringData = submission.proctoringData || {};
+    const tabSwitches = (submission.tabSwitchCount || 0) + (proctoringData.tabSwitches || 0);
+    const escKeyPresses = proctoringData.escKeyPresses || 0;
+    const multipleFaces = proctoringData.multipleFacesDetected || 0;
+    const phoneDetected = proctoringData.phoneDetected || 0;
+    const voiceDetected = proctoringData.voiceDetected || 0;
+    const noFace = proctoringData.noFaceDetected || 0;
+    const lookingAway = proctoringData.lookingAwayDetected || 0;
+    const suspiciousObjects = proctoringData.suspiciousObjectDetected || 0;
+    const fullscreenExits = proctoringData.fullscreenExits || 0;
+    
+    const totalViolations = tabSwitches + escKeyPresses + multipleFaces + phoneDetected + voiceDetected + 
+                           noFace + lookingAway + suspiciousObjects + fullscreenExits +
+                           (proctoringData.copyAttempts || 0) + (proctoringData.pasteAttempts || 0) +
+                           (proctoringData.rightClickAttempts || 0) + (proctoringData.devToolsAttempts || 0);
 
-    // High risk: Many tab switches or high total violations or high proctoring violations
-    if (tabSwitches > 5 || totalViolations > 8 || proctoringViolations > 8) {
+    // Critical violations that immediately flag as high risk
+    if (multipleFaces > 0 || phoneDetected > 0 || voiceDetected > 1) {
+      return { level: 'high', color: 'error', label: 'High Risk' };
+    }
+    
+    // High risk: Many violations
+    if (tabSwitches > 5 || escKeyPresses > 3 || totalViolations > 8 || fullscreenExits > 2) {
       return { level: 'high', color: 'error', label: 'High Risk' };
     } 
-    // Medium risk: Tab switches > 1 or some violations
-    else if (tabSwitches > 1 || totalViolations > 4 || proctoringViolations > 4) {
+    // Medium risk: Some violations
+    else if (tabSwitches > 1 || escKeyPresses > 1 || totalViolations > 3 || noFace > 2 || lookingAway > 3) {
       return { level: 'medium', color: 'warning', label: 'Flagged' };
     } 
     // Low risk: Clean or minimal activity
@@ -168,13 +182,18 @@ const IntegrityMonitorTab = ({ classId }) => {
       </Alert>
 
       {/* Assignment Filter */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+        <FormControl fullWidth sx={{ minWidth: { xs: '100%', sm: 300 } }}>
           <InputLabel>Select Assignment</InputLabel>
           <Select
             value={selectedAssignment}
             label="Select Assignment"
             onChange={(e) => setSelectedAssignment(e.target.value)}
+            sx={{
+              '& .MuiSelect-select': {
+                fontSize: { xs: '0.875rem', sm: '1rem' }
+              }
+            }}
           >
             <MenuItem value="">
               <em>None</em>
@@ -254,8 +273,20 @@ const IntegrityMonitorTab = ({ classId }) => {
 
       {/* Integrity Monitor Table */}
       {!loading && selectedAssignment && cheatData.length > 0 && (
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer 
+          component={Paper}
+          sx={{ 
+            overflowX: 'auto',
+            '&::-webkit-scrollbar': {
+              height: 6,
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderRadius: 3,
+            },
+          }}
+        >
+          <Table sx={{ minWidth: { xs: 800, md: 'auto' } }}>
             <TableHead>
               <TableRow>
                 <TableCell><strong>Student Name</strong></TableCell>
@@ -333,10 +364,12 @@ const IntegrityMonitorTab = ({ classId }) => {
                           <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4 }}>
                             {submission.proctoringData.multipleFacesDetected > 0 && `👥 ${submission.proctoringData.multipleFacesDetected} `}
                             {submission.proctoringData.noFaceDetected > 0 && `❌ ${submission.proctoringData.noFaceDetected} `}
+                            {submission.proctoringData.lookingAwayDetected > 0 && `👀 ${submission.proctoringData.lookingAwayDetected} `}
                             {submission.proctoringData.phoneDetected > 0 && `📱 ${submission.proctoringData.phoneDetected} `}
-                            {submission.proctoringData.audioAnomalies > 0 && `🔊 ${submission.proctoringData.audioAnomalies} `}
-                            {submission.proctoringData.suspiciousMovements > 0 && `🏃 ${submission.proctoringData.suspiciousMovements} `}
-                            {submission.proctoringData.tabSwitching > 0 && `🔄 ${submission.proctoringData.tabSwitching} `}
+                            {submission.proctoringData.voiceDetected > 0 && `🔊 ${submission.proctoringData.voiceDetected} `}
+                            {submission.proctoringData.suspiciousObjectDetected > 0 && `📄 ${submission.proctoringData.suspiciousObjectDetected} `}
+                            {submission.proctoringData.tabSwitches > 0 && `🔄 ${submission.proctoringData.tabSwitches} `}
+                            {submission.proctoringData.fullscreenExits > 0 && `⛔ ${submission.proctoringData.fullscreenExits} `}
                           </Typography>
                           <Typography variant="caption" color="primary" sx={{ fontSize: '0.7rem', fontStyle: 'italic' }}>
                             Click for details
@@ -386,20 +419,21 @@ const IntegrityMonitorTab = ({ classId }) => {
       <Dialog 
         open={violationDialogOpen} 
         onClose={() => setViolationDialogOpen(false)}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <SecurityIcon color="error" />
             <Typography variant="h6">
-              AI Proctoring Violations - {selectedViolations?.candidateName}
+              Proctoring Violations - {selectedViolations?.candidateName}
             </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           {selectedViolations && (
             <List>
+              {/* Multiple Faces */}
               <ListItem>
                 <ListItemIcon>
                   <PeopleIcon color={selectedViolations.data.multipleFacesDetected > 0 ? 'error' : 'disabled'} />
@@ -411,6 +445,7 @@ const IntegrityMonitorTab = ({ classId }) => {
               </ListItem>
               <Divider />
               
+              {/* No Face */}
               <ListItem>
                 <ListItemIcon>
                   <FaceIcon color={selectedViolations.data.noFaceDetected > 0 ? 'error' : 'disabled'} />
@@ -421,7 +456,20 @@ const IntegrityMonitorTab = ({ classId }) => {
                 />
               </ListItem>
               <Divider />
+
+              {/* Looking Away */}
+              <ListItem>
+                <ListItemIcon>
+                  <VisibilityOffIcon color={selectedViolations.data.lookingAwayDetected > 0 ? 'warning' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Looking Away" 
+                  secondary={`${selectedViolations.data.lookingAwayDetected || 0} times - Candidate looking away from screen`}
+                />
+              </ListItem>
+              <Divider />
               
+              {/* Phone Detected */}
               <ListItem>
                 <ListItemIcon>
                   <PhoneAndroidIcon color={selectedViolations.data.phoneDetected > 0 ? 'error' : 'disabled'} />
@@ -432,56 +480,111 @@ const IntegrityMonitorTab = ({ classId }) => {
                 />
               </ListItem>
               <Divider />
-              
+
+              {/* Voice/Audio */}
               <ListItem>
                 <ListItemIcon>
-                  <RecordVoiceOverIcon color={selectedViolations.data.audioAnomalies > 0 ? 'warning' : 'disabled'} />
+                  <RecordVoiceOverIcon color={selectedViolations.data.voiceDetected > 0 ? 'error' : 'disabled'} />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Audio Anomalies" 
-                  secondary={`${selectedViolations.data.audioAnomalies || 0} times - Loud sounds, voices, or suspicious audio detected`}
+                  primary="Voice Detected" 
+                  secondary={`${selectedViolations.data.voiceDetected || 0} times - Talking or suspicious audio detected`}
+                />
+              </ListItem>
+              <Divider />
+
+              {/* Suspicious Objects */}
+              <ListItem>
+                <ListItemIcon>
+                  <WarningIcon color={selectedViolations.data.suspiciousObjectDetected > 0 ? 'warning' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Suspicious Objects" 
+                  secondary={`${selectedViolations.data.suspiciousObjectDetected || 0} times - Papers, books, or notes detected`}
                 />
               </ListItem>
               <Divider />
               
+              {/* Tab Switching */}
               <ListItem>
                 <ListItemIcon>
-                  <DirectionsRunIcon color={selectedViolations.data.suspiciousMovements > 0 ? 'warning' : 'disabled'} />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Suspicious Movements" 
-                  secondary={`${selectedViolations.data.suspiciousMovements || 0} times - Unusual or excessive movement detected`}
-                />
-              </ListItem>
-              <Divider />
-              
-              <ListItem>
-                <ListItemIcon>
-                  <SwapHorizIcon color={selectedViolations.data.tabSwitching > 0 ? 'error' : 'disabled'} />
+                  <SwapHorizIcon color={selectedViolations.data.tabSwitches > 0 ? 'error' : 'disabled'} />
                 </ListItemIcon>
                 <ListItemText 
                   primary="Tab Switching" 
-                  secondary={`${selectedViolations.data.tabSwitching || 0} times - Switched to different browser tab or window`}
+                  secondary={`${selectedViolations.data.tabSwitches || 0} times - Switched to another tab or window`}
                 />
               </ListItem>
               <Divider />
-              
-              <ListItem sx={{ bgcolor: 'background.default', mt: 2, borderRadius: 1 }}>
+
+              {/* Fullscreen Exits */}
+              <ListItem>
+                <ListItemIcon>
+                  <TabIcon color={selectedViolations.data.fullscreenExits > 0 ? 'error' : 'disabled'} />
+                </ListItemIcon>
                 <ListItemText 
-                  primary={
-                    <Typography variant="h6" color="error">
-                      Total Violations: {selectedViolations.data.totalViolations || 0}
-                    </Typography>
-                  }
-                  secondary={
-                    <Typography variant="body2" color="text.secondary">
-                      Risk Level: {
-                        selectedViolations.data.totalViolations > 8 ? 'High Risk 🔴' :
-                        selectedViolations.data.totalViolations > 4 ? 'Flagged 🟡' :
-                        'Clean ✅'
-                      }
-                    </Typography>
-                  }
+                  primary="Fullscreen Exits" 
+                  secondary={`${selectedViolations.data.fullscreenExits || 0} times - Exited fullscreen mode`}
+                />
+              </ListItem>
+              <Divider />
+
+              {/* ESC Key Presses */}
+              <ListItem>
+                <ListItemIcon>
+                  <WarningIcon color={selectedViolations.data.escKeyPresses > 0 ? 'warning' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="ESC Key Pressed" 
+                  secondary={`${selectedViolations.data.escKeyPresses || 0} times - Attempted to exit with ESC key`}
+                />
+              </ListItem>
+              <Divider />
+
+              {/* Copy/Paste */}
+              <ListItem>
+                <ListItemIcon>
+                  <SecurityIcon color={(selectedViolations.data.copyAttempts + selectedViolations.data.pasteAttempts) > 0 ? 'warning' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Copy/Paste Attempts" 
+                  secondary={`${(selectedViolations.data.copyAttempts || 0) + (selectedViolations.data.pasteAttempts || 0)} times - Tried to copy or paste text`}
+                />
+              </ListItem>
+              <Divider />
+
+              {/* Right Click */}
+              <ListItem>
+                <ListItemIcon>
+                  <SecurityIcon color={selectedViolations.data.rightClickAttempts > 0 ? 'warning' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Right Click Attempts" 
+                  secondary={`${selectedViolations.data.rightClickAttempts || 0} times - Right-click attempts`}
+                />
+              </ListItem>
+              <Divider />
+
+              {/* DevTools */}
+              <ListItem>
+                <ListItemIcon>
+                  <SecurityIcon color={selectedViolations.data.devToolsAttempts > 0 ? 'error' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="DevTools Attempts" 
+                  secondary={`${selectedViolations.data.devToolsAttempts || 0} times - Tried to open developer tools`}
+                />
+              </ListItem>
+              <Divider />
+
+              {/* Network Issues */}
+              <ListItem>
+                <ListItemIcon>
+                  <WarningIcon color={selectedViolations.data.networkIssues > 0 ? 'warning' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Network Issues" 
+                  secondary={`${selectedViolations.data.networkIssues || 0} times - Internet connection lost`}
                 />
               </ListItem>
             </List>

@@ -586,8 +586,17 @@ const ResultsTab = ({ classId, className, courseCode }) => {
             </Button>
           </Box>
           <Divider sx={{ mb: 2 }} />
-          <TableContainer>
-            <Table size="small">
+          <TableContainer sx={{ 
+            overflowX: 'auto',
+            '&::-webkit-scrollbar': {
+              height: 6,
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderRadius: 3,
+            },
+          }}>
+            <Table size="small" sx={{ minWidth: { xs: 600, md: 'auto' } }}>
               <TableHead>
                 <TableRow>
                   <TableCell width="5%" sx={{ fontWeight: 600 }}>#</TableCell>
@@ -647,8 +656,13 @@ const ResultsTab = ({ classId, className, courseCode }) => {
                         <Chip
                           label={branchInfo}
                           size="small"
-                          color={!subgroup ? 'success' : 'default'}
-                          sx={{ fontWeight: 500 }}
+                          sx={{ 
+                            fontWeight: 500,
+                            bgcolor: '#000000',
+                            color: '#ffffff',
+                            height: 24,
+                            fontSize: '0.75rem',
+                          }}
                         />
                       </TableCell>
                       <TableCell align="center">
@@ -662,8 +676,10 @@ const ResultsTab = ({ classId, className, courseCode }) => {
                           size="small"
                           sx={{ 
                             fontWeight: 500,
-                            bgcolor: type === 'percentage' ? 'secondary.light' : 'info.light',
-                            color: type === 'percentage' ? 'secondary.dark' : 'info.dark'
+                            bgcolor: '#000000',
+                            color: '#ffffff',
+                            height: 24,
+                            fontSize: '0.75rem',
                           }}
                         />
                       </TableCell>

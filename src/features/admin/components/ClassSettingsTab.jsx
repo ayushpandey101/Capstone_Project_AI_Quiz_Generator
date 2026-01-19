@@ -43,6 +43,8 @@ const ClassSettingsTab = ({ classData, onClassUpdated }) => {
   const [showResults, setShowResults] = useState(classData?.showResults ?? true);
   const [showRosterToCandidates, setShowRosterToCandidates] = useState(classData?.showRosterToCandidates ?? false);
   const [showLeaderboardToCandidates, setShowLeaderboardToCandidates] = useState(classData?.showLeaderboardToCandidates ?? false);
+  const [messagingEnabled, setMessagingEnabled] = useState(classData?.messagingEnabled ?? true);
+  const [allowStudentMessages, setAllowStudentMessages] = useState(classData?.allowStudentMessages ?? true);
   
   // UI states
   const [isUpdating, setIsUpdating] = useState(false);
@@ -75,6 +77,8 @@ const ClassSettingsTab = ({ classData, onClassUpdated }) => {
           showResults,
           showRosterToCandidates,
           showLeaderboardToCandidates,
+          messagingEnabled,
+          allowStudentMessages,
         }),
       });
 
@@ -324,7 +328,42 @@ const ClassSettingsTab = ({ classData, onClassUpdated }) => {
                 <Box>
                   <Typography variant="body1">Show Leaderboard to Candidates</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Candidates can view class rankings and performance leaderboard
+                    Candidates can view the class leaderboard and compare their performance
+                  </Typography>
+                </Box>
+              }
+            />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={messagingEnabled}
+                  onChange={(e) => setMessagingEnabled(e.target.checked)}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body1">Enable Messaging for this Class</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Allow messaging section to be visible to students in this class
+                  </Typography>
+                </Box>
+              }
+            />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={allowStudentMessages}
+                  onChange={(e) => setAllowStudentMessages(e.target.checked)}
+                  disabled={!messagingEnabled}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body1">Allow Students to Send Messages</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Students can post questions and replies (only works when messaging is enabled)
                   </Typography>
                 </Box>
               }

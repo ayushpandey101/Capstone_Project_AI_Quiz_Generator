@@ -33,10 +33,16 @@ export const useGoogleAuth = (clientId) => {
 export const initializeGoogleOneTap = (clientId, callback) => {
   if (!window.google || !clientId) return;
 
-  window.google.accounts.id.initialize({
-    client_id: clientId,
-    callback: callback,
-  });
+  try {
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: callback,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+    });
+  } catch (error) {
+
+  }
 };
 
 /**
@@ -55,6 +61,9 @@ export const renderGoogleButton = (elementId, clientId, callback, options = {}) 
     window.google.accounts.id.initialize({
       client_id: clientId,
       callback: callback,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+      ux_mode: 'popup',
     });
 
     window.google.accounts.id.renderButton(
@@ -65,7 +74,6 @@ export const renderGoogleButton = (elementId, clientId, callback, options = {}) 
         text: options.text || 'continue_with',
         shape: options.shape || 'rectangular',
         logo_alignment: options.logo_alignment || 'left',
-        // Remove width option - Google API doesn't accept percentage values
       }
     );
 
@@ -82,7 +90,7 @@ export const renderGoogleButton = (elementId, clientId, callback, options = {}) 
 
     return true;
   } catch (error) {
+
     return false;
   }
 };
-

@@ -143,7 +143,7 @@ const ContentLibrary = () => {
       handleCloseDeleteModal();
 
     } catch (error) {
-      alert(`Failed to delete quiz: ${error.message}`);
+
     }
     
     fetchQuizzes();
@@ -156,19 +156,33 @@ const ContentLibrary = () => {
   );
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       {/* Page Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1">
+      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+        <Typography 
+          variant="h4" 
+          component="h1"
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2rem' },
+            fontWeight: 'bold'
+          }}
+        >
           Content Library
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          sx={{ 
+            mt: 1,
+            fontSize: { xs: '0.813rem', sm: '0.875rem' }
+          }}
+        >
           Manage and assign your quizzes to classes
         </Typography>
       </Box>
 
       {/* Search Bar */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
         <TextField
           fullWidth
           placeholder="Search quizzes by title or number of questions..."
@@ -181,7 +195,12 @@ const ContentLibrary = () => {
               </InputAdornment>
             ),
           }}
-          sx={{ maxWidth: 600 }}
+          sx={{ 
+            maxWidth: { xs: '100%', sm: 600 },
+            '& .MuiInputBase-input': {
+              fontSize: { xs: '0.875rem', sm: '1rem' }
+            }
+          }}
         />
       </Box>
 
@@ -193,7 +212,7 @@ const ContentLibrary = () => {
       )}
       
       {/* Grid of Content Cards */}
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mt: 4 }}>
             <Loader />

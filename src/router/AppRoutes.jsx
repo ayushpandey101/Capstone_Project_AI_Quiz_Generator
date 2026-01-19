@@ -29,12 +29,13 @@ import CheatActivityPage from '../features/admin/pages/CheatActivityPage';
 // Candidate Pages
 import JoinClassPage from '../features/candidate/pages/JoinClassPage';
 import CandidateMyClassesPage from '../features/candidate/pages/MyClassesPage';
-import ClassAssignmentsPage from '../features/candidate/pages/ClassAssignmentsPage';
 import TakeQuizPage from '../features/candidate/pages/TakeQuizPage';
 import CandidateDashboard from '../features/candidate/pages/CandidateDashboard';
 import CandidateProfilePage from '../features/candidate/pages/ProfilePage';
 import ClassRosterPage from '../features/candidate/pages/ClassRosterPage';
 import ClassLeaderboardPage from '../features/candidate/pages/ClassLeaderboardPage';
+import LearningHubPage from '../features/candidate/pages/LearningHubPage';
+import CandidateClassDetailsPage from '../features/candidate/pages/CandidateClassDetailsPage';
 
 /**
  * Centralized router configuration
@@ -89,7 +90,9 @@ const AppRoutes = () => {
         <Route path="dashboard" element={<CandidateDashboard />} />
         <Route path="my-classes" element={<CandidateMyClassesPage />} />
         <Route path="join-class" element={<JoinClassPage />} />
-        <Route path="class/:classId/assignments" element={<ClassAssignmentsPage />} />
+        <Route path="learning-hub" element={<LearningHubPage />} />
+        <Route path="class/:classId" element={<CandidateClassDetailsPage />} />
+        <Route path="class/:classId/assignments" element={<Navigate to="/candidate/class/:classId" replace />} />
         <Route path="class/:classId/roster" element={<ClassRosterPage />} />
         <Route path="class/:classId/leaderboard" element={<ClassLeaderboardPage />} />
         <Route path="assignment/:assignmentId" element={<TakeQuizPage />} />

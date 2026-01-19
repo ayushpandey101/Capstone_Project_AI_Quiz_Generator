@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { authAPI } from '../../../core/services/api';
+import { deduplicateRequest } from '../../../utils/requestCache';
 
 const AuthContext = createContext(null);
 
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const authCheckRef = useRef(false);
 
   // Decode token whenever it changes to extract user info
   useEffect(() => {
@@ -53,9 +55,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Check if user is logged in on mount
+  // Check if user is logged in on mount (with duplicate call prevention)
   useEffect(() => {
-    checkAuth();
+    if (!authCheckRef.current) {
+      authCheckRef.current = true;
+      checkAuth();
+    }
   }, []);
 
   const checkAuth = async () => {
@@ -64,8 +69,12 @@ export const AuthProvider = ({ children }) => {
       const storedUser = localStorage.getItem('user');
 
       if (storedToken && storedUser) {
-        // Verify token is still valid by fetching user data
-        const response = await authAPI.getMe();
+        // Verify token is still valid by fetching user data (with deduplication)
+        const response = await deduplicateRequest(
+          'auth-check',
+          () => authAPI.getMe(),
+          5000 // Cache for 5 seconds to prevent rapid duplicate calls
+        );
         setUser(response.user);
         setToken(storedToken);
         setIsAuthenticated(true);
@@ -75,12 +84,15 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
       }
     } catch (error) {
-      // Token invalid or expired
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      setUser(null);
-      setToken(null);
-      setIsAuthenticated(false);
+      // Only clear auth on 401/403 errors, not on network/rate limit errors
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setToken(null);
+        setIsAuthenticated(false);
+      }
+      // For other errors (429, 500, network), keep existing auth state
     } finally {
       setLoading(false);
     }

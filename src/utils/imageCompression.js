@@ -76,9 +76,7 @@ export const compressImage = async (file, options = {}) => {
           }
           
           const finalSizeKB = getSize(compressedDataUrl);
-          
-          console.log(`Image compressed: ${file.size / 1024}KB → ${finalSizeKB.toFixed(2)}KB (${((1 - finalSizeKB / (file.size / 1024)) * 100).toFixed(1)}% reduction)`);
-          
+
           resolve(compressedDataUrl);
         } catch (error) {
           reject(new Error('Failed to compress image: ' + error.message));

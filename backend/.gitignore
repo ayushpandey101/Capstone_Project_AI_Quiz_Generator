@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 **/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Environment variables (SENSITIVE!)
 .env
@@ -68,11 +71,13 @@ temp/
 *.sqlite3
 *.db
 
-# SSL Certificates (if any)
+# SSL Certificates (SENSITIVE!)
 *.pem
 *.key
 *.cert
 *.crt
+ssl/
+certs/
 
 # Misc
 .cache/
@@ -80,10 +85,17 @@ temp/
 .next/
 .nuxt/
 
-# Markdown documentation files (except README)
+# Markdown documentation files (except main README)
 *.md
 !README.md
 
-# Uploaded files
+# Uploaded files (user content)
 uploads/*
 !uploads/.gitkeep
+uploads/chat/*
+!uploads/chat/.gitkeep
+
+# Sensitive configuration files
+config/production.js
+config/secrets.js
+config/database.production.js

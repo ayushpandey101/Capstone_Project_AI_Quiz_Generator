@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/contexts/AuthContext';
-import { Users, ArrowLeft, AlertCircle, User } from 'lucide-react';
+import { 
+  Box, Typography, Button, Paper, Grid, Avatar,
+  List, ListItem, ListItemAvatar, ListItemText
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PeopleIcon from '@mui/icons-material/People';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import PersonIcon from '@mui/icons-material/Person';
 import Loader from '../../../components/Loader';
 
 /**
@@ -48,102 +55,170 @@ function ClassRosterPage() {
   }, [token, classId]);
 
   return (
-    <div className="p-6">
-      <div className="max-w-4xl mx-auto">
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
         {/* Back Button */}
-        <button
-          onClick={() => navigate(`/candidate/class/${classId}/assignments`)}
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(`/candidate/class/${classId}`)}
+          sx={{
+            color: '#000000',
+            mb: { xs: 3, sm: 4 },
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+          }}
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm font-medium">Back to Assignments</span>
-        </button>
+          Back to Assignments
+        </Button>
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="text-center py-12">
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
             <Loader />
-          </div>
+          </Box>
         ) : error ? (
           // Error State
-          <div className="bg-white rounded-xl border border-red-200 p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Unable to View Roster</h3>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 8, 
+              textAlign: 'center',
+              border: '2px solid',
+              borderColor: '#fecaca',
+              borderRadius: 2
+            }}
+          >
+            <ErrorOutlineIcon sx={{ fontSize: 64, color: '#f87171', mb: 2 }} />
+            <Typography variant="h5" fontWeight="600" gutterBottom sx={{ color: '#1f2937' }}>
+              Unable to View Roster
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {error}
+            </Typography>
+            <Button
+              startIcon={<ArrowBackIcon />}
               onClick={() => navigate(`/candidate/class/${classId}/assignments`)}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
+              variant="contained"
+              sx={{
+                bgcolor: '#000000',
+                '&:hover': { bgcolor: '#1f2937' }
+              }}
             >
-              <ArrowLeft className="w-4 h-4" />
               Back to Assignments
-            </button>
-          </div>
+            </Button>
+          </Paper>
         ) : (
           <>
             {/* Page Header */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <Users className="w-5 h-5 text-gray-700" />
-                </div>
-                <h1 className="text-3xl font-semibold text-gray-800">
+            <Box sx={{ mb: { xs: 3, sm: 4 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                <Box 
+                  sx={{ 
+                    p: 1.5, 
+                    background: 'linear-gradient(135deg, #000000 0%, #374151 100%)',
+                    borderRadius: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <PeopleIcon sx={{ fontSize: 24, color: '#ffffff' }} />
+                </Box>
+                <Typography variant="h4" fontWeight="600" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                   Class Roster
-                </h1>
-              </div>
-              <p className="text-gray-500 text-sm ml-14">
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ ml: { xs: 0, sm: 7 }, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
                 {classData?.students?.length || 0} student{classData?.students?.length !== 1 ? 's' : ''} enrolled in {classData?.title}
-              </p>
-            </div>
+              </Typography>
+            </Box>
 
             {/* Class Info Card */}
-            <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Course Code</p>
-                  <p className="font-mono text-sm font-medium text-gray-900">{classData?.courseCode}</p>
-                </div>
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: { xs: 3, sm: 4 }, 
+                mb: 3, 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2
+              }}
+            >
+              <Grid container spacing={{ xs: 2, sm: 3 }}>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Course Code
+                  </Typography>
+                  <Typography variant="body2" fontWeight="600" sx={{ fontFamily: 'monospace' }}>
+                    {classData?.courseCode}
+                  </Typography>
+                </Grid>
                 {classData?.semester && (
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">Semester</p>
-                    <p className="text-sm font-medium text-gray-900">{classData.semester}</p>
-                  </div>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                      Semester
+                    </Typography>
+                    <Typography variant="body2" fontWeight="600">
+                      {classData.semester}
+                    </Typography>
+                  </Grid>
                 )}
                 {classData?.academicYear && (
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">Academic Year</p>
-                    <p className="text-sm font-medium text-gray-900">{classData.academicYear}</p>
-                  </div>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                      Academic Year
+                    </Typography>
+                    <Typography variant="body2" fontWeight="600">
+                      {classData.academicYear}
+                    </Typography>
+                  </Grid>
                 )}
-              </div>
-            </div>
+              </Grid>
+            </Paper>
 
             {/* Students List */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 className="text-xl font-semibold text-gray-900">Enrolled Students</h2>
-              </div>
+            <Paper 
+              elevation={0}
+              sx={{ 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 2,
+                overflow: 'hidden'
+              }}
+            >
+              <Box 
+                sx={{ 
+                  px: 3, 
+                  py: 2, 
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: '#f3f4f6'
+                }}
+              >
+                <Typography variant="h6" fontWeight="600" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                  Enrolled Students
+                </Typography>
+              </Box>
               
               {classData?.students?.length === 0 ? (
-                <div className="p-12 text-center">
-                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">No students enrolled yet</p>
-                </div>
+                <Box sx={{ p: 12, textAlign: 'center' }}>
+                  <PeopleIcon sx={{ fontSize: 48, color: '#d1d5db', mb: 3 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    No students enrolled yet
+                  </Typography>
+                </Box>
               ) : (
-                <div className="divide-y divide-gray-200">
+                <List sx={{ p: 0 }}>
                   {[...(classData?.students || [])]
                     .sort((a, b) => {
                       const regA = a.registrationNumber || '';
                       const regB = b.registrationNumber || '';
                       
-                      // If either doesn't have registration number, sort by name
                       if (!regA && !regB) {
                         return (a.name || '').localeCompare(b.name || '');
                       }
                       if (!regA) return 1;
                       if (!regB) return -1;
                       
-                      // Custom sorting for registration numbers
-                      // Split into alphabetic and numeric parts for better sorting
                       const matchA = regA.match(/^(\d*)([A-Za-z]+)(\d*)$/);
                       const matchB = regB.match(/^(\d*)([A-Za-z]+)(\d*)$/);
                       
@@ -151,55 +226,67 @@ function ClassRosterPage() {
                         const [, yearA, branchA, numA] = matchA;
                         const [, yearB, branchB, numB] = matchB;
                         
-                        // First sort by year (numeric)
                         const yearCompare = parseInt(yearA || '0') - parseInt(yearB || '0');
                         if (yearCompare !== 0) return yearCompare;
                         
-                        // Then sort by branch (alphabetic)
                         const branchCompare = branchA.localeCompare(branchB);
                         if (branchCompare !== 0) return branchCompare;
                         
-                        // Finally sort by number (numeric)
                         return parseInt(numA || '0') - parseInt(numB || '0');
                       }
                       
-                      // Fallback to string comparison
                       return regA.localeCompare(regB);
                     })
                     .map((student, index) => (
-                    <div 
+                    <ListItem 
                       key={student._id || index}
-                      className="px-6 py-4 hover:bg-gray-50 transition-colors"
+                      divider
+                      sx={{
+                        py: 2,
+                        px: 3,
+                        '&:hover': {
+                          bgcolor: 'rgba(0,0,0,0.02)'
+                        }
+                      }}
                     >
-                      <div className="flex items-center justify-between gap-4">
-                        {/* Left: Avatar and Name */}
-                        <div className="flex items-center gap-4 flex-1 min-w-0">
-                          <div className="flex-shrink-0">
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                              <User className="w-5 h-5 text-white" />
-                            </div>
-                          </div>
-                          <p className="text-base font-medium text-gray-900 truncate">
+                      <ListItemAvatar>
+                        <Avatar 
+                          sx={{ 
+                            width: 44, 
+                            height: 44,
+                            bgcolor: '#000000',
+                            fontSize: '1rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          <PersonIcon />
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Typography variant="body1" fontWeight="600" sx={{ fontSize: { xs: '0.9375rem', sm: '1rem' } }}>
                             {student.name}
-                          </p>
-                        </div>
-                        
-                        {/* Right: Registration Number */}
-                        <div className="flex-shrink-0">
-                          <p className="text-sm text-gray-600 font-mono font-medium">
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary"
+                            sx={{ fontFamily: 'monospace', fontSize: { xs: '0.8125rem', sm: '0.875rem' }, mt: 0.5 }}
+                          >
                             {student.registrationNumber}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
                   ))}
-                </div>
+                </List>
               )}
-            </div>
+            </Paper>
           </>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

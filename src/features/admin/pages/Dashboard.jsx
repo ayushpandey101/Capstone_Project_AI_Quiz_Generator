@@ -10,6 +10,10 @@ import {
   TextField,
   InputAdornment,
   Chip,
+  LinearProgress,
+  Paper,
+  Avatar,
+  AvatarGroup,
 } from '@mui/material';
 import { useAuth } from '../../auth/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +23,10 @@ import QuizIcon from '@mui/icons-material/Quiz';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Loader from '../../../components/Loader';
 
 const QuickActionCard = ({ title, description, icon, color = 'primary', onClick, count }) => {
@@ -26,20 +34,20 @@ const QuickActionCard = ({ title, description, icon, color = 'primary', onClick,
     <Card 
       sx={{ 
         width: '100%',
-        maxWidth: 'calc(33.333% - 16px)',
         height: '220px',
-        background: (theme) => `linear-gradient(135deg, ${alpha(theme.palette[color].main, 0.1)} 0%, ${alpha(theme.palette[color].main, 0.05)} 100%)`,
+        background: '#ffffff',
         border: '1px solid',
-        borderColor: (theme) => alpha(theme.palette[color].main, 0.2),
+        borderColor: 'grey.200',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: 2,
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: 4,
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          borderColor: 'primary.main',
         }
       }}
     >
@@ -61,12 +69,11 @@ const QuickActionCard = ({ title, description, icon, color = 'primary', onClick,
               <Box sx={{ 
                 p: 1.2, 
                 borderRadius: 1.5, 
-                bgcolor: `${color}.main`,
+                bgcolor: color === 'primary' ? 'primary.main' : color === 'success' ? 'secondary.main' : 'primary.light',
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: 1,
               }}>
                 {React.cloneElement(icon, { sx: { fontSize: 26 } })}
               </Box>
@@ -75,24 +82,25 @@ const QuickActionCard = ({ title, description, icon, color = 'primary', onClick,
                   label={count} 
                   size="small" 
                   sx={{ 
-                    bgcolor: `${color}.main`,
-                    color: 'white',
+                    bgcolor: 'grey.100',
+                    color: 'text.primary',
                     fontWeight: 'bold',
                     height: '26px',
                     fontSize: '0.875rem',
                     px: 1.2,
+                    border: '1px solid',
+                    borderColor: 'grey.200',
                   }} 
                 />
               )}
             </Box>
             
-            <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.05rem', mb: 1, lineHeight: 1.3 }}>
+            <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.05rem', mb: 1, lineHeight: 1.3, color: 'text.primary' }}>
               {title}
             </Typography>
             
             <Typography 
               variant="body2" 
-              color="text.secondary" 
               sx={{ 
                 fontSize: '0.875rem',
                 lineHeight: 1.5,
@@ -102,13 +110,14 @@ const QuickActionCard = ({ title, description, icon, color = 'primary', onClick,
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
                 minHeight: '42px',
+                color: 'text.secondary',
               }}
             >
               {description}
             </Typography>
           </Box>
           
-          <Box sx={{ display: 'flex', alignItems: 'center', color: `${color}.main`, mt: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', color: 'primary.main', mt: 1.5 }}>
             <Typography variant="body2" fontWeight="600" sx={{ fontSize: '0.875rem' }}>
               Get Started
             </Typography>
@@ -198,13 +207,18 @@ const Dashboard = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       {/* Header Section */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
+      <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
+        <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ 
+          color: 'primary.main',
+          fontSize: { xs: '1.5rem', sm: '2rem' }
+        }}>
           Hi {user?.name?.split(' ')[0] || 'there'}! Ready to teach?
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="text.secondary" sx={{
+          fontSize: { xs: '0.875rem', sm: '1rem' }
+        }}>
           Manage your classes, students, and quizzes all in one place
         </Typography>
       </Box>
@@ -213,7 +227,7 @@ const Dashboard = () => {
       <Box 
         component="form"
         onSubmit={handleSearch}
-        sx={{ mb: 2.5 }}
+        sx={{ mb: 2.5, display: { xs: 'block', md: 'none' } }}
       >
         <TextField
           fullWidth
@@ -223,7 +237,7 @@ const Dashboard = () => {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <SearchIcon sx={{ color: 'text.secondary' }} />
               </InputAdornment>
             ),
           }}
@@ -231,6 +245,12 @@ const Dashboard = () => {
             '& .MuiOutlinedInput-root': {
               borderRadius: 2,
               bgcolor: 'background.paper',
+              '&:hover fieldset': {
+                borderColor: 'primary.main',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'primary.main',
+              },
             }
           }}
           onKeyPress={(e) => {
@@ -243,14 +263,24 @@ const Dashboard = () => {
 
       {/* Quick Actions Grid */}
       <Box sx={{ mb: 2 }}>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
+        <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: 'primary.main' }}>
           Quick Actions
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', width: '100%' }}>
         {quickActions.map((action, index) => (
-          <QuickActionCard key={index} {...action} />
+          <Box key={index} sx={{ 
+            flex: { 
+              xs: '1 1 100%',
+              sm: '1 1 calc(50% - 8px)',
+              md: '1 1 calc(33.333% - 11px)'
+            },
+            minWidth: { xs: '100%', sm: 280 },
+            maxWidth: { xs: '100%', sm: 'calc(50% - 8px)', md: 'calc(33.333% - 11px)' }
+          }}>
+            <QuickActionCard {...action} />
+          </Box>
         ))}
       </Box>
     </Box>

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/contexts/AuthContext';
-import { BookOpen, Users, Calendar, ArrowRight } from 'lucide-react';
+import { 
+  Box, Typography, Grid, Card, CardContent, Button, Chip, CircularProgress, Alert 
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import PeopleIcon from '@mui/icons-material/People';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Loader from '../../../components/Loader';
 
 /**
@@ -47,109 +54,206 @@ function MyClassesPage() {
   }, [token, user]);
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-800 mb-1">
-            My Classes
-          </h1>
-          <p className="text-gray-500 text-sm">Your enrolled classes</p>
-        </div>
+    <Box sx={{ width: '100%' }}>
+      {/* Page Header */}
+      <Box sx={{ mb: { xs: 3, sm: 4 } }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            fontWeight: 'bold', 
+            mb: 0.5,
+            fontSize: { xs: '1.5rem', sm: '2rem' }
+          }}
+        >
+          My Classes
+        </Typography>
+        <Typography 
+          variant="body1" 
+          color="text.secondary"
+          sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+        >
+          Your enrolled classes
+        </Typography>
+      </Box>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
-              <span className="text-lg">⚠</span>
-              <span>{error}</span>
-            </div>
-          )}
+      {/* Error Message */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+          {error}
+        </Alert>
+      )}
 
-          {/* Loading State */}
-          {isLoading ? (
-            <div className="text-center py-12">
-              <Loader />
-            </div>
-          ) : classes.length === 0 ? (
-            // Empty State
-            <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
-              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">No classes yet</h3>
-              <p className="text-gray-500 mb-6 text-sm">
-                Join your first class to get started
-              </p>
-              <button
-                onClick={() => navigate('/candidate/join-class')}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
+      {/* Loading State */}
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <Loader />
+        </Box>
+      ) : classes.length === 0 ? (
+        // Empty State
+        <Card 
+          sx={{ 
+            p: { xs: 8, sm: 12 }, 
+            textAlign: 'center',
+            bgcolor: 'background.paper',
+            border: '2px dashed',
+            borderColor: 'divider',
+          }}
+        >
+          <SchoolIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+          <Typography variant="h6" gutterBottom color="text.secondary">
+            No classes yet
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Join your first class to get started
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleIcon />}
+            onClick={() => navigate('/candidate/join-class')}
+            sx={{ 
+              bgcolor: '#000000',
+              '&:hover': { bgcolor: '#1f2937' }
+            }}
+          >
+            Join Class
+          </Button>
+        </Card>
+      ) : (
+        // Classes Grid
+        <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+          {classes.map((classItem) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={classItem._id}>
+              <Card 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  borderRadius: 2,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: 8,
+                    borderColor: 'primary.main',
+                  },
+                }}
+                onClick={() => navigate(`/candidate/class/${classItem._id}`)}
               >
-                Join Class
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            // Classes Grid
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {classes.map((classItem) => (
-                <div 
-                  key={classItem._id}
-                  onClick={() => navigate(`/candidate/class/${classItem._id}/assignments`)}
-                  className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-md transition-all duration-200 cursor-pointer"
-                >
-                  {/* Card Content */}
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="p-2.5 bg-gray-100 rounded-lg">
-                        <BookOpen className="w-5 h-5 text-gray-700" />
-                      </div>
-                      <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-md">
-                        Enrolled
-                      </span>
-                    </div>
-
-                    <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-1">
-                      {classItem.title}
-                    </h3>
-                    
-                    <p className="text-sm text-gray-500 mb-4 line-clamp-2 min-h-10">
-                      {classItem.description || 'No description'}
-                    </p>
-
-                    <div className="space-y-2.5 pb-4 mb-4 border-b border-gray-100">
-                      <div className="inline-flex">
-                        <span className="font-mono text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md font-medium">
-                          {classItem.courseCode}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <div className="flex items-center gap-1.5">
-                          <Users className="w-3.5 h-3.5" />
-                          <span>{classItem.students?.length || 0} students</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{new Date(classItem.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button 
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/candidate/class/${classItem._id}/assignments`);
+                <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                    <Box sx={{ 
+                      p: 1, 
+                      bgcolor: '#f3f4f6', 
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <SchoolIcon sx={{ fontSize: 20, color: '#374151' }} />
+                    </Box>
+                    <Chip 
+                      label="Enrolled"
+                      size="small"
+                      sx={{ 
+                        bgcolor: '#dcfce7',
+                        color: '#166534',
+                        fontWeight: 600,
+                        height: 20,
+                        fontSize: '0.7rem',
                       }}
-                    >
-                      View Assignments
-                      <ArrowRight className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                    />
+                  </Box>
+
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 600, 
+                      mb: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 1,
+                      WebkitBoxOrient: 'vertical',
+                      fontSize: { xs: '0.95rem', sm: '1rem' }
+                    }}
+                  >
+                    {classItem.title}
+                  </Typography>
+                  
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    sx={{ 
+                      mb: 2,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      minHeight: 36,
+                      fontSize: '0.8125rem'
+                    }}
+                  >
+                    {classItem.description || 'No description'}
+                  </Typography>
+
+                  <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                    <Chip
+                      label={classItem.courseCode}
+                      size="small"
+                      sx={{ 
+                        bgcolor: '#f3f4f6',
+                        color: '#374151',
+                        fontWeight: 600,
+                        fontFamily: 'monospace',
+                        height: 24,
+                        fontSize: '0.7rem',
+                      }}
+                    />
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <PeopleIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                        {classItem.students?.length || 0} students
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <CalendarTodayIcon sx={{ fontSize: 13, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                        {new Date(classItem.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Button 
+                    fullWidth
+                    variant="contained"
+                    endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/candidate/class/${classItem._id}`);
+                    }}
+                    sx={{ 
+                      bgcolor: '#000000',
+                      '&:hover': { bgcolor: '#1f2937' },
+                      fontWeight: 600,
+                      py: 1,
+                      fontSize: '0.8125rem'
+                    }}
+                  >
+                    View Assignments
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+    </Box>
   );
 }
 

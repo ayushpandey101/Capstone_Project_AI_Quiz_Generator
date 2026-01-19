@@ -10,7 +10,8 @@ const answerSchema = new Schema({
   },
   selectedAnswer: {
     type: String,
-    required: true,
+    required: false, // Allow empty answers for unanswered questions
+    default: '',
   },
   isCorrect: {
     type: Boolean,
@@ -52,14 +53,21 @@ const submissionSchema = new Schema({
   },
   // AI Proctoring data
   proctoringData: {
-    suspiciousMovements: { type: Number, default: 0 },
-    multipleFacesDetected: { type: Number, default: 0 },
+    tabSwitches: { type: Number, default: 0 },
+    fullscreenExits: { type: Number, default: 0 },
+    escKeyPresses: { type: Number, default: 0 },
+    copyAttempts: { type: Number, default: 0 },
+    pasteAttempts: { type: Number, default: 0 },
+    rightClickAttempts: { type: Number, default: 0 },
+    devToolsAttempts: { type: Number, default: 0 },
+    cameraViolations: { type: Number, default: 0 },
+    networkIssues: { type: Number, default: 0 },
     noFaceDetected: { type: Number, default: 0 },
-    lookingAway: { type: Number, default: 0 },
+    multipleFacesDetected: { type: Number, default: 0 },
+    lookingAwayDetected: { type: Number, default: 0 },
     phoneDetected: { type: Number, default: 0 },
-    audioAnomalies: { type: Number, default: 0 },
-    tabSwitching: { type: Number, default: 0 },
-    totalViolations: { type: Number, default: 0 },
+    voiceDetected: { type: Number, default: 0 },
+    suspiciousObjectDetected: { type: Number, default: 0 },
     timestamps: [{ type: Date }] // When violations occurred
   },
   answers: [answerSchema], // Array of candidate's answers
@@ -130,6 +138,13 @@ const assignmentSchema = new Schema({
   submissions: [submissionSchema],
 
 }, { timestamps: true });
+
+// Create indexes for performance
+assignmentSchema.index({ classId: 1 });
+assignmentSchema.index({ quizId: 1 });
+assignmentSchema.index({ dueDate: 1 });
+assignmentSchema.index({ classId: 1, dueDate: 1 }); // Compound index for class assignments
+assignmentSchema.index({ 'submissions.candidateId': 1 }); // Index for candidate submissions
 
 const Assignment = mongoose.model('Assignment', assignmentSchema);
 

@@ -79,11 +79,11 @@ const CandidateDashboard = () => {
         <Typography 
           variant="h4" 
           fontWeight="600" 
-          sx={{ mb: 1, color: 'text.primary', fontSize: { xs: '1.75rem', sm: '1.875rem' } }}
+          sx={{ mb: 1, color: 'text.primary', fontSize: { xs: '1.5rem', sm: '2rem' } }}
         >
           Dashboard
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
           Your upcoming assignments and tasks
         </Typography>
       </Box>
@@ -128,17 +128,21 @@ const CandidateDashboard = () => {
                           <Grid size={{ xs: 12, md: 8 }}>
                             <Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, flexWrap: 'wrap' }}>
-                                <Typography variant="h6" fontWeight="600" sx={{ fontSize: '1.1rem' }}>
+                                <Typography variant="h6" fontWeight="600" sx={{ fontSize: { xs: '0.95rem', sm: '1.1rem' } }}>
                                   {assignment.quizId ? assignment.quizId.title : 'Quiz'}
                                 </Typography>
                                 <Chip 
                                   label={formatDueDate(assignment.dueDate)}
-                                  color={getDueDateColor(assignment.dueDate)}
                                   size="small"
                                   sx={{ 
                                     fontWeight: 600, 
-                                    height: 26,
-                                    fontSize: '0.75rem'
+                                    height: 24,
+                                    fontSize: '0.75rem',
+                                    bgcolor: '#000000',
+                                    color: '#ffffff',
+                                    '&:hover': {
+                                      bgcolor: '#1f2937'
+                                    }
                                   }}
                                 />
                               </Box>
@@ -162,8 +166,8 @@ const CandidateDashboard = () => {
                                 </Typography>
                                 
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <EventIcon sx={{ fontSize: 16 }} />
+                                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
+                                    <EventIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />
                                     {new Date(assignment.dueDate).toLocaleDateString('en-US', { 
                                       month: 'short', 
                                       day: 'numeric',
@@ -173,14 +177,14 @@ const CandidateDashboard = () => {
                                   </Typography>
                                   
                                   {assignment.quizId?.questions && (
-                                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                      <AssignmentIcon sx={{ fontSize: 16 }} />
+                                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
+                                      <AssignmentIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />
                                       {assignment.quizId.questions.length} questions
                                     </Typography>
                                   )}
                                   
-                                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <AccessTimeIcon sx={{ fontSize: 16 }} />
+                                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
+                                    <AccessTimeIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />
                                     {assignment.timeLimit} min
                                   </Typography>
                                 </Box>
@@ -204,8 +208,10 @@ const CandidateDashboard = () => {
                                   textTransform: 'none',
                                   boxShadow: 'none',
                                   minWidth: { md: 140 },
+                                  bgcolor: '#000000',
                                   '&:hover': {
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                    bgcolor: '#1f2937'
                                   }
                                 }}
                               >
@@ -247,7 +253,13 @@ const CandidateDashboard = () => {
                         textTransform: 'none',
                         fontWeight: 600,
                         px: 3,
-                        py: 1
+                        py: 1,
+                        borderColor: '#000000',
+                        color: '#000000',
+                        '&:hover': {
+                          borderColor: '#1f2937',
+                          bgcolor: 'rgba(0,0,0,0.04)'
+                        }
                       }}
                     >
                       View My Classes

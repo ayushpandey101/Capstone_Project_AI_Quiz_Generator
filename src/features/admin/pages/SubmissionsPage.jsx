@@ -15,8 +15,17 @@ import {
   CircularProgress,
   Chip,
   Alert,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useAuth } from '../../auth/contexts/AuthContext';
 import Loader from '../../../components/Loader';
 
@@ -24,6 +33,9 @@ const SubmissionsPage = () => {
   const [submissionData, setSubmissionData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const { assignmentId } = useParams();
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -71,6 +83,64 @@ const SubmissionsPage = () => {
   };
 
   const stats = submissionData?.submissions ? calculateStats(submissionData.submissions) : null;
+
+  const handleDeleteClick = (e, submission) => {
+    e.stopPropagation();
+    setSelectedSubmission(submission);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/assignments/${assignmentId}/submissions/${selectedSubmission._id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to delete submission');
+      }
+
+      // Remove the deleted submission from the local state
+      setSubmissionData(prev => ({
+        ...prev,
+        submissions: prev.submissions.filter(sub => sub._id !== selectedSubmission._id)
+      }));
+
+      setSnackbar({
+        open: true,
+        message: 'Submission deleted successfully. Candidate can now retake the exam.',
+        severity: 'success'
+      });
+
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.message || 'Failed to delete submission',
+        severity: 'error'
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedSubmission(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setSelectedSubmission(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   if (isLoading) {
     return (
@@ -209,6 +279,7 @@ const SubmissionsPage = () => {
               <TableCell><strong>Status</strong></TableCell>
               <TableCell><strong>Activity</strong></TableCell>
               <TableCell align="right"><strong>Score</strong></TableCell>
+              <TableCell align="center"><strong>Actions</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -293,6 +364,17 @@ const SubmissionsPage = () => {
                         size="medium"
                       />
                     </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Delete submission (allow retake)">
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={(e) => handleDeleteClick(e, sub)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
                 );
               })
@@ -313,6 +395,39 @@ const SubmissionsPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>Delete Submission?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the submission for{' '}
+            <strong>{selectedSubmission?.candidateId?.name}</strong>?
+            <br /><br />
+            This will allow the candidate to retake the exam. This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

@@ -129,6 +129,12 @@ userSchema.pre('save', async function (next) {
   }
 });
 
+// Create indexes for performance
+// Note: email, registrationNumber, googleId already have unique indexes from schema
+userSchema.index({ role: 1 });
+userSchema.index({ isActive: 1 });
+userSchema.index({ email: 1, role: 1 }); // Compound index for login
+
 // Method to compare passwords
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {

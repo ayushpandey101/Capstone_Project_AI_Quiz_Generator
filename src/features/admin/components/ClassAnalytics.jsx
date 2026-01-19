@@ -453,8 +453,18 @@ const ClassAnalytics = ({ classId, token }) => {
         <Typography variant="h6" fontWeight="600" gutterBottom>
           Student Rankings
         </Typography>
-        <TableContainer sx={{ mt: 2 }}>
-          <Table>
+        <TableContainer sx={{ 
+          mt: 2,
+          overflowX: 'auto',
+          '&::-webkit-scrollbar': {
+            height: 6,
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(0,0,0,0.2)',
+            borderRadius: 3,
+          },
+        }}>
+          <Table sx={{ minWidth: { xs: 600, md: 'auto' } }}>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: 600 }}>Rank</TableCell>

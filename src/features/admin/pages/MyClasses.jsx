@@ -98,7 +98,7 @@ const MyClasses = () => {
       handleCloseModal(); // Close the modal
 
     } catch (error) {
-      alert('Failed to create class: ' + error.message);
+
     }
   };
 
@@ -138,28 +138,49 @@ const MyClasses = () => {
       handleCloseDeleteModal();
 
     } catch (error) {
-      alert('Failed to delete class: ' + error.message);
+
     }
   };
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       {/* 1. Page Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 2, sm: 0 },
+        mb: { xs: 2, sm: 3 }
+      }}>
+        <Typography 
+          variant="h4" 
+          component="h1"
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2rem' },
+            fontWeight: 'bold'
+          }}
+        >
           My Classes
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleOpenModal}
+          sx={{ 
+            bgcolor: '#000000',
+            width: { xs: '100%', sm: 'auto' },
+            '&:hover': { 
+              bgcolor: '#1f2937'
+            }
+          }}
         >
           Create New Class
         </Button>
       </Box>
 
       {/* 2. Grid of Class Cards (now uses state) */}
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
         {classes.length === 0 ? (
           <Grid size={{ xs: 12 }}>
             <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', mt: 4 }}>

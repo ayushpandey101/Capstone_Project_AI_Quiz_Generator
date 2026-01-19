@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/contexts/AuthContext';
+import Loader from '../../components/Loader';
 
 /**
  * ProtectedRoute component to restrict access based on authentication and role
@@ -12,18 +13,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   // Show loading state
   if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '1.5rem',
-        color: '#666'
-      }}>
-        Loading...
-      </div>
-    );
+    return <Loader />;
   }
 
   // Not authenticated - redirect to login

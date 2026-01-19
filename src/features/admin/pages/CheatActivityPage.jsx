@@ -130,14 +130,36 @@ const CheatActivityPage = () => {
         const submissions = result.data?.submissions || [];
         setCheatData(submissions);
         
-        // Calculate statistics
+        // Calculate statistics using same logic as IntegrityMonitorTab
         const totalSubs = submissions.length;
-        const suspicious = submissions.filter(
-          s => ((s.tabSwitchCount || 0) > 2 || ((s.tabSwitchCount || 0) + (s.escCount || 0)) > 3 || (s.escCount || 0) > 1)
-        ).length;
+        const suspicious = submissions.filter(s => {
+          const proctoringData = s.proctoringData || {};
+          const tabSwitches = (s.tabSwitchCount || 0) + (proctoringData.tabSwitches || 0);
+          const escKeyPresses = proctoringData.escKeyPresses || 0;
+          const multipleFaces = proctoringData.multipleFacesDetected || 0;
+          const phoneDetected = proctoringData.phoneDetected || 0;
+          const voiceDetected = proctoringData.voiceDetected || 0;
+          const noFace = proctoringData.noFaceDetected || 0;
+          const lookingAway = proctoringData.lookingAwayDetected || 0;
+          const fullscreenExits = proctoringData.fullscreenExits || 0;
+          
+          const totalViolations = tabSwitches + escKeyPresses + multipleFaces + phoneDetected + 
+                                 voiceDetected + noFace + lookingAway + fullscreenExits +
+                                 (proctoringData.copyAttempts || 0) + (proctoringData.pasteAttempts || 0) +
+                                 (proctoringData.rightClickAttempts || 0) + (proctoringData.devToolsAttempts || 0) +
+                                 (proctoringData.suspiciousObjectDetected || 0);
+          
+          // Flag if has significant violations
+          return tabSwitches > 1 || escKeyPresses > 1 || totalViolations > 3 || 
+                 multipleFaces > 0 || phoneDetected > 0 || voiceDetected > 1;
+        }).length;
+        
         const clean = totalSubs - suspicious;
         const avgTabSwitches = totalSubs > 0
-          ? (submissions.reduce((sum, s) => sum + (s.tabSwitchCount || 0), 0) / totalSubs).toFixed(1)
+          ? (submissions.reduce((sum, s) => {
+              const proctoringData = s.proctoringData || {};
+              return sum + (s.tabSwitchCount || 0) + (proctoringData.tabSwitches || 0);
+            }, 0) / totalSubs).toFixed(1)
           : 0;
 
         setStats({
@@ -155,23 +177,39 @@ const CheatActivityPage = () => {
   };
 
   const getSuspiciousLevel = (submission) => {
-    // Add proctoring tab switching to tabSwitchCount
-    const proctorTabSwitch = submission.proctoringData?.tabSwitching || 0;
-    const tabSwitches = (submission.tabSwitchCount || 0) + proctorTabSwitch;
-    const proctoringViolations = submission.proctoringData?.totalViolations || 0;
-    const totalViolations = tabSwitches + proctoringViolations;
+    // Calculate all proctoring violations (matching IntegrityMonitorTab logic)
+    const proctoringData = submission.proctoringData || {};
+    const tabSwitches = (submission.tabSwitchCount || 0) + (proctoringData.tabSwitches || 0);
+    const escKeyPresses = proctoringData.escKeyPresses || 0;
+    const multipleFaces = proctoringData.multipleFacesDetected || 0;
+    const phoneDetected = proctoringData.phoneDetected || 0;
+    const voiceDetected = proctoringData.voiceDetected || 0;
+    const noFace = proctoringData.noFaceDetected || 0;
+    const lookingAway = proctoringData.lookingAwayDetected || 0;
+    const suspiciousObjects = proctoringData.suspiciousObjectDetected || 0;
+    const fullscreenExits = proctoringData.fullscreenExits || 0;
+    
+    const totalViolations = tabSwitches + escKeyPresses + multipleFaces + phoneDetected + voiceDetected + 
+                           noFace + lookingAway + suspiciousObjects + fullscreenExits +
+                           (proctoringData.copyAttempts || 0) + (proctoringData.pasteAttempts || 0) +
+                           (proctoringData.rightClickAttempts || 0) + (proctoringData.devToolsAttempts || 0);
 
-    // High risk: Many tab switches or high total violations or high proctoring violations
-    if (tabSwitches > 5 || totalViolations > 8 || proctoringViolations > 8) {
-      return { level: 'high', color: 'error', label: 'High Risk' };
+    // Critical violations that immediately flag as high risk
+    if (multipleFaces > 0 || phoneDetected > 0 || voiceDetected > 1) {
+      return { level: 'high', color: 'error', label: 'High Risk', totalViolations };
+    }
+    
+    // High risk: Many violations
+    if (tabSwitches > 5 || escKeyPresses > 3 || totalViolations > 8 || fullscreenExits > 2) {
+      return { level: 'high', color: 'error', label: 'High Risk', totalViolations };
     } 
-    // Medium risk: Tab switches > 1 or some violations
-    else if (tabSwitches > 1 || totalViolations > 4 || proctoringViolations > 4) {
-      return { level: 'medium', color: 'warning', label: 'Flagged' };
+    // Medium risk: Some violations
+    else if (tabSwitches > 1 || escKeyPresses > 1 || totalViolations > 3 || noFace > 2 || lookingAway > 3) {
+      return { level: 'medium', color: 'warning', label: 'Flagged', totalViolations };
     } 
     // Low risk: Clean or minimal activity
     else {
-      return { level: 'low', color: 'success', label: 'Clean' };
+      return { level: 'low', color: 'success', label: 'Clean', totalViolations };
     }
   };
 
@@ -347,7 +385,7 @@ const CheatActivityPage = () => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <TabIcon fontSize="small" />
-                        <strong>{(submission.tabSwitchCount || 0) + (submission.proctoringData?.tabSwitching || 0)}</strong>
+                        <strong>{(submission.tabSwitchCount || 0) + (submission.proctoringData?.tabSwitches || 0)}</strong>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -370,18 +408,18 @@ const CheatActivityPage = () => {
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <VideocamIcon fontSize="small" color={
-                              (submission.proctoringData.totalViolations || 0) > 8 ? 'error' :
-                              (submission.proctoringData.totalViolations || 0) > 4 ? 'warning' : 'success'
+                              suspiciousInfo.totalViolations > 8 ? 'error' :
+                              suspiciousInfo.totalViolations > 4 ? 'warning' : 'success'
                             } />
-                            <strong>{submission.proctoringData.totalViolations || 0} total</strong>
+                            <strong>{suspiciousInfo.totalViolations} total</strong>
                           </Box>
                           <Typography variant="caption" color="text.secondary">
                             {submission.proctoringData.multipleFacesDetected > 0 && `👥 ${submission.proctoringData.multipleFacesDetected} `}
                             {submission.proctoringData.noFaceDetected > 0 && `❌ ${submission.proctoringData.noFaceDetected} `}
                             {submission.proctoringData.phoneDetected > 0 && `📱 ${submission.proctoringData.phoneDetected} `}
-                            {submission.proctoringData.audioAnomalies > 0 && `🔊 ${submission.proctoringData.audioAnomalies} `}
-                            {submission.proctoringData.suspiciousMovements > 0 && `🏃 ${submission.proctoringData.suspiciousMovements} `}
-                            {submission.proctoringData.tabSwitching > 0 && `🔄 ${submission.proctoringData.tabSwitching} `}
+                            {submission.proctoringData.voiceDetected > 0 && `🔊 ${submission.proctoringData.voiceDetected} `}
+                            {submission.proctoringData.lookingAwayDetected > 0 && `👀 ${submission.proctoringData.lookingAwayDetected} `}
+                            {submission.proctoringData.tabSwitches > 0 && `🔄 ${submission.proctoringData.tabSwitches} `}
                           </Typography>
                           <Typography variant="caption" color="primary" sx={{ fontSize: '0.7rem', fontStyle: 'italic' }}>
                             Click for details
@@ -480,33 +518,44 @@ const CheatActivityPage = () => {
               
               <ListItem>
                 <ListItemIcon>
-                  <RecordVoiceOverIcon color={selectedViolations.data.audioAnomalies > 0 ? 'warning' : 'disabled'} />
+                  <RecordVoiceOverIcon color={selectedViolations.data.voiceDetected > 0 ? 'warning' : 'disabled'} />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Audio Anomalies" 
-                  secondary={`${selectedViolations.data.audioAnomalies || 0} times - Loud sounds, voices, or suspicious audio detected`}
+                  primary="Voice Detected" 
+                  secondary={`${selectedViolations.data.voiceDetected || 0} times - Voice or talking detected during exam`}
                 />
               </ListItem>
               <Divider />
               
               <ListItem>
                 <ListItemIcon>
-                  <DirectionsRunIcon color={selectedViolations.data.suspiciousMovements > 0 ? 'warning' : 'disabled'} />
+                  <DirectionsRunIcon color={selectedViolations.data.lookingAwayDetected > 0 ? 'warning' : 'disabled'} />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Suspicious Movements" 
-                  secondary={`${selectedViolations.data.suspiciousMovements || 0} times - Unusual or excessive movement detected`}
+                  primary="Looking Away Detected" 
+                  secondary={`${selectedViolations.data.lookingAwayDetected || 0} times - Candidate looking away from screen`}
                 />
               </ListItem>
               <Divider />
               
               <ListItem>
                 <ListItemIcon>
-                  <SwapHorizIcon color={selectedViolations.data.tabSwitching > 0 ? 'error' : 'disabled'} />
+                  <SwapHorizIcon color={selectedViolations.data.tabSwitches > 0 ? 'error' : 'disabled'} />
                 </ListItemIcon>
                 <ListItemText 
                   primary="Tab Switching" 
-                  secondary={`${selectedViolations.data.tabSwitching || 0} times - Switched to different browser tab or window`}
+                  secondary={`${selectedViolations.data.tabSwitches || 0} times - Switched to different browser tab or window`}
+                />
+              </ListItem>
+              <Divider />
+              
+              <ListItem>
+                <ListItemIcon>
+                  <VisibilityOffIcon color={selectedViolations.data.fullscreenExits > 0 ? 'error' : 'disabled'} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Fullscreen Exits" 
+                  secondary={`${selectedViolations.data.fullscreenExits || 0} times - Exited fullscreen mode`}
                 />
               </ListItem>
               <Divider />
@@ -515,16 +564,41 @@ const CheatActivityPage = () => {
                 <ListItemText 
                   primary={
                     <Typography variant="h6" color="error">
-                      Total Violations: {selectedViolations.data.totalViolations || 0}
+                      Total Violations: {
+                        (selectedViolations.data.tabSwitches || 0) +
+                        (selectedViolations.data.escKeyPresses || 0) +
+                        (selectedViolations.data.multipleFacesDetected || 0) +
+                        (selectedViolations.data.phoneDetected || 0) +
+                        (selectedViolations.data.voiceDetected || 0) +
+                        (selectedViolations.data.noFaceDetected || 0) +
+                        (selectedViolations.data.lookingAwayDetected || 0) +
+                        (selectedViolations.data.suspiciousObjectDetected || 0) +
+                        (selectedViolations.data.fullscreenExits || 0) +
+                        (selectedViolations.data.copyAttempts || 0) +
+                        (selectedViolations.data.pasteAttempts || 0) +
+                        (selectedViolations.data.rightClickAttempts || 0) +
+                        (selectedViolations.data.devToolsAttempts || 0)
+                      }
                     </Typography>
                   }
                   secondary={
                     <Typography variant="body2" color="text.secondary">
-                      Risk Level: {
-                        selectedViolations.data.totalViolations > 8 ? 'High Risk 🔴' :
-                        selectedViolations.data.totalViolations > 4 ? 'Flagged 🟡' :
-                        'Clean ✅'
-                      }
+                      Risk Level: {(() => {
+                        const total = (selectedViolations.data.tabSwitches || 0) +
+                          (selectedViolations.data.escKeyPresses || 0) +
+                          (selectedViolations.data.multipleFacesDetected || 0) +
+                          (selectedViolations.data.phoneDetected || 0) +
+                          (selectedViolations.data.voiceDetected || 0) +
+                          (selectedViolations.data.noFaceDetected || 0) +
+                          (selectedViolations.data.lookingAwayDetected || 0) +
+                          (selectedViolations.data.suspiciousObjectDetected || 0) +
+                          (selectedViolations.data.fullscreenExits || 0) +
+                          (selectedViolations.data.copyAttempts || 0) +
+                          (selectedViolations.data.pasteAttempts || 0) +
+                          (selectedViolations.data.rightClickAttempts || 0) +
+                          (selectedViolations.data.devToolsAttempts || 0);
+                        return total > 8 ? 'High Risk 🔴' : total > 4 ? 'Flagged 🟡' : 'Clean ✅';
+                      })()}
                     </Typography>
                   }
                 />

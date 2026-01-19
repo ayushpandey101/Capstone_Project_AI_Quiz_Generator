@@ -15,6 +15,7 @@ import {
 } from '../controllers/authController.js';
 import { googleAuth } from '../controllers/googleAuthController.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { authLimiter, uploadLimiter } from '../middleware/rateLimiter.js';
 import { body, validationResult } from 'express-validator';
 import upload from '../config/multer.js';
 
@@ -60,27 +61,32 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Local authentication routes
-router.post('/register', validateRegistration, handleValidationErrors, register);
-router.post('/login', validateLogin, handleValidationErrors, login);
+// Local authentication routes - Apply rate limiting
+router.post('/register', authLimiter, validateRegistration, handleValidationErrors, register);
+router.post('/login', authLimiter, validateLogin, handleValidationErrors, login);
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
 
 // Profile management routes
 router.put('/update-profile', protect, updateProfile);
 router.put('/change-password', protect, changePassword);
-router.post('/upload-avatar', protect, upload.single('avatar'), uploadAvatar);
+router.post('/upload-avatar', protect, uploadLimiter, upload.single('avatar'), uploadAvatar);
 
-// Password reset routes
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:token', resetPassword);
+// Password reset routes - Rate limit to prevent abuse
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.post('/reset-password/:token', authLimiter, resetPassword);
 
 // Google OAuth - Credential-based (for frontend Google Identity Services)
+// Handle OPTIONS preflight for Google auth
+router.options('/google', (req, res) => {
+  res.status(200).end();
+});
+
 router.post('/google', googleAuth);
 
-// Google OAuth routes
+// Google OAuth routes (legacy passport flow)
 router.get(
-  '/google',
+  '/google/oauth',
   passport.authenticate('google', {
     scope: ['profile', 'email'],
   })

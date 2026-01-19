@@ -6,6 +6,9 @@ import passport from 'passport';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
+import compression from 'compression';
+import mongoSanitize from 'express-mongo-sanitize';
 import connectDB from './config/database.js';
 import configureGoogleOAuth from './config/passport.js';
 import authRoutes from './routes/authRoutes.js';
@@ -14,7 +17,10 @@ import classRoutes from './routes/classRoutes.js';
 import candidateRoutes from './routes/candidateRoutes.js';
 import assignmentRoutes from './routes/assignmentRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import learningRoutes from './routes/learningRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 import { protect } from './middleware/authMiddleware.js';
+import { generalLimiter } from './middleware/rateLimiter.js';
 import Class from './models/Class.js';
 import Quiz from './models/Quiz.js';
 import Assignment from './models/Assignment.js';
@@ -35,30 +41,95 @@ connectDB();
 // Configure Google OAuth
 configureGoogleOAuth();
 
+// Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://accounts.google.com", "https://apis.google.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      frameSrc: ["'self'", "https://accounts.google.com"],
+      connectSrc: ["'self'", "https://accounts.google.com", "http://localhost:5000"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin images
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }, // Allow Google OAuth popups
+}));
+app.use(compression()); // Compress all responses
+app.use(mongoSanitize()); // Prevent MongoDB injection attacks
+
+// Apply general rate limiter to all routes
+app.use('/api/', generalLimiter);
+
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'https://accounts.google.com',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true, // Allow cookies to be sent
   optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 // Middleware
 app.use(cors(corsOptions));
-// Increase payload size limit to handle Base64 encoded images
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Add additional headers for Google OAuth and CORS
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
+// Payload size limits - Use smaller limits for most routes
+app.use(express.json({ limit: '10mb' })); // Reduced from 50mb
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // Session configuration (required for passport)
+if (!process.env.SESSION_SECRET) {
+  console.error('⚠️  WARNING: SESSION_SECRET not set in environment variables!');
+  process.exit(1); // Force exit in production if secret not set
+}
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'strict', // CSRF protection
     },
   })
 );
@@ -67,16 +138,19 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+// Serve static files from uploads directory with CORS headers
+app.use('/uploads', cors(corsOptions), express.static(path.join(__dirname, '../public/uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/classes', classRoutes);
+app.use('/api/messages', messageRoutes); // Global message routes (notifications)
+app.use('/api/classes', messageRoutes); // Class-specific message routes
 app.use('/api/candidate', candidateRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/learning', learningRoutes);
 
 // Dashboard Stats Route
 // @route   GET /api/admin/dashboard/stats
@@ -150,9 +224,17 @@ app.get('/api/candidate/dashboard', protect, async (req, res) => {
     .populate('classId', 'title courseCode') // Get class title and course code
     .sort({ dueDate: 1 }); // Sort by due date (1 = ascending)
 
+    // 3. Filter out assignments that the candidate has already submitted
+    const unsubmittedAssignments = assignments.filter(assignment => {
+      const hasSubmitted = assignment.submissions.some(
+        sub => sub.candidateId.toString() === candidateId.toString()
+      );
+      return !hasSubmitted;
+    });
+
     res.status(200).json({
       success: true,
-      data: assignments,
+      data: unsubmittedAssignments,
     });
 
   } catch (error) {
@@ -239,10 +321,12 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  });
+  console.log(`Server running on port ${PORT}`);
+});
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Promise Rejection:', err);
   // Close server & exit process
   process.exit(1);
 });

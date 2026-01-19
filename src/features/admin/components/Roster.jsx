@@ -320,8 +320,21 @@ const Roster = ({ students, inviteCode, classId, onStudentRemoved }) => {
       </Box>
 
       {/* 2. Student List (now uses props) */}
-      <Box sx={{ p: 3, background: 'white', borderRadius: 2, boxShadow: 2 }}>
-        <List sx={{ p: 0 }}>
+      <Box sx={{ 
+        p: { xs: 2, sm: 3 }, 
+        background: 'white', 
+        borderRadius: 2, 
+        boxShadow: 2,
+        overflowX: 'auto',
+        '&::-webkit-scrollbar': {
+          height: 6,
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.2)',
+          borderRadius: 3,
+        },
+      }}>
+        <List sx={{ p: 0, minWidth: { xs: 700, md: 'auto' } }}>
           <ListItem sx={{ border: 'none', borderRadius: 0, mb: 0, px: 2, py: 1, background: 'transparent' }}>
             <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', fontFamily: 'inherit', gap: 6 }}>
               <Box sx={{ flex: 1, fontWeight: 700, fontSize: '1rem', fontFamily: 'inherit', minWidth: 140 }}>Name</Box>

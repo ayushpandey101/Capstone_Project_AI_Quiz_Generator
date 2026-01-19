@@ -164,11 +164,25 @@ const AssignQuizModal = ({ open, onClose, quiz, classId, onSuccess, token }) => 
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>
-        <Typography variant="h6" component="span">Assign Quiz to Class</Typography>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      fullWidth 
+      maxWidth="sm"
+      sx={{
+        '& .MuiDialog-paper': {
+          m: { xs: 1, sm: 2 },
+          maxHeight: { xs: 'calc(100% - 16px)', sm: 'calc(100% - 64px)' },
+          width: { xs: 'calc(100% - 16px)', sm: '100%' }
+        }
+      }}
+    >
+      <DialogTitle sx={{ pb: 1 }}>
+        <Typography variant="h6" component="span" sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+          Assign Quiz to Class
+        </Typography>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
@@ -261,10 +275,10 @@ const AssignQuizModal = ({ open, onClose, quiz, classId, onSuccess, token }) => 
         
         {/* Info box for branch selection */}
         <Alert severity="info" variant="outlined" sx={{ mt: 2, mb: 1 }}>
-          <Typography variant="caption" display="block" gutterBottom>
+          <Typography variant="caption" display="block" gutterBottom sx={{ fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}>
             <strong>📌 Branch Selection Tips:</strong>
           </Typography>
-          <Typography variant="caption" component="div">
+          <Typography variant="caption" component="div" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' }, lineHeight: 1.6 }}>
             • Select <strong>"ALL"</strong> to make quiz available to all students<br/>
             • Choose from common suggestions or type custom branch codes<br/>
             • Type and press <strong>Enter</strong> to add custom branches (e.g., MECH, CHEM, BIO)<br/>
@@ -297,11 +311,15 @@ const AssignQuizModal = ({ open, onClose, quiz, classId, onSuccess, token }) => 
         />
 
         <FormControl component="fieldset" margin="normal" fullWidth>
-          <FormLabel component="legend">Weightage Type</FormLabel>
+          <FormLabel component="legend" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Weightage Type</FormLabel>
           <RadioGroup
-            row
+            row={false}
             value={weightageType}
             onChange={(e) => setWeightageType(e.target.value)}
+            sx={{ 
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 0.5, sm: 0 }
+            }}
           >
             <FormControlLabel 
               value="percentage" 
@@ -338,7 +356,7 @@ const AssignQuizModal = ({ open, onClose, quiz, classId, onSuccess, token }) => 
         />
 
         {/* AI Proctoring Section */}
-        <Box>
+        <Box sx={{ mt: { xs: 2, sm: 3 } }}>
           <FormControlLabel
             control={
               <Switch
@@ -349,20 +367,26 @@ const AssignQuizModal = ({ open, onClose, quiz, classId, onSuccess, token }) => 
             }
             label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1" fontWeight={600}>
+                <Typography variant="body1" fontWeight={600} sx={{ fontSize: { xs: '0.9375rem', sm: '1rem' } }}>
                   🎥 Enable AI Proctoring
                 </Typography>
               </Box>
             }
+            sx={{
+              ml: 0,
+              '& .MuiFormControlLabel-label': {
+                width: '100%'
+              }
+            }}
           />
           
           <Alert severity={proctoringEnabled ? 'warning' : 'info'} variant="outlined" sx={{ mt: 1 }}>
-            <Typography variant="caption" display="block" gutterBottom>
+            <Typography variant="caption" display="block" gutterBottom sx={{ fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}>
               <strong>
                 {proctoringEnabled ? '🎥 AI Proctoring Enabled' : 'ℹ️ About AI Proctoring'}
               </strong>
             </Typography>
-            <Typography variant="caption" component="div">
+            <Typography variant="caption" component="div" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' }, lineHeight: 1.6 }}>
               {proctoringEnabled ? (
                 <>
                   Students will be monitored during the quiz using:<br/>
